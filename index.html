@@ -860,11 +860,123 @@
       color: var(--muted-foreground);
     }
 
+    .timeline-card .date {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+      color: var(--primary-glow);
+      background: color-mix(in srgb, var(--primary) 12%, transparent);
+      border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent);
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .timeline-card .role-org {
+      display: block;
+      margin-top: 0.15rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted-foreground);
+    }
+
+    .timeline-divider {
+      position: relative;
+      list-style: none;
+      margin: 0.5rem 0 1.25rem;
+      padding: 0.25rem 0 0.25rem 0.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+      opacity: 0.7;
+    }
+
+    .timeline-divider::before {
+      content: '';
+      position: absolute;
+      left: calc(-2rem - 5px);
+      top: 50%;
+      width: 9px;
+      height: 9px;
+      border-radius: 9999px;
+      background: var(--primary-glow);
+      box-shadow: 0 0 18px color-mix(in oklab, var(--primary-glow) 65%, transparent);
+      transform: translateY(-50%);
+    }
+
     .timeline-card p {
       margin-top: 0.5rem;
       font-size: 0.875rem;
       line-height: 1.625;
       color: var(--muted-foreground);
+    }
+
+    .leadership-block {
+      max-width: 48rem;
+      margin: 3rem auto 0;
+      padding-left: 2rem;
+    }
+
+    .leadership-block .section-label {
+      margin-bottom: 1rem;
+    }
+
+    .leadership-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .leadership-card {
+      display: flex;
+      gap: 1rem;
+      border-radius: calc(var(--radius) + 8px);
+      padding: 1.25rem;
+    }
+
+    .leadership-icon {
+      display: grid;
+      place-items: center;
+      flex: 0 0 2.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--primary-glow);
+    }
+
+    .leadership-icon svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .leadership-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .leadership-card .org {
+      display: block;
+      margin-top: 0.15rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted-foreground);
+    }
+
+    .leadership-card p {
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      line-height: 1.625;
+      color: var(--muted-foreground);
+    }
+
+    @media (max-width: 640px) {
+      .leadership-block {
+        padding-left: 0;
+      }
     }
 
     /* ===== Life / Hobbies Section ===== */
@@ -1327,12 +1439,498 @@
     .section-title:hover::after {
       left: 100%;
     }
+
+    /* =====================================================================
+       NEW INTERACTIVE LAYER
+       ===================================================================== */
+
+    /* ---- Scroll progress bar ---- */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      width: 0%;
+      z-index: 200;
+      background: linear-gradient(90deg, var(--primary), var(--primary-glow));
+      box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 70%, transparent);
+      transition: width 0.1s linear;
+    }
+
+    /* ---- Nav icon buttons (theme + command) ---- */
+    .nav-icon-btn {
+      display: grid;
+      place-items: center;
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--surface) 60%, transparent);
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    }
+
+    .nav-icon-btn:hover {
+      background: var(--surface-elevated);
+      color: var(--foreground);
+      transform: translateY(-2px);
+    }
+
+    .nav-icon-btn svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .cmd-hint {
+      display: none;
+      align-items: center;
+      gap: 0.4rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--surface) 60%, transparent);
+      padding: 0.35rem 0.7rem;
+      font-size: 0.8rem;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .cmd-hint:hover {
+      background: var(--surface-elevated);
+      color: var(--foreground);
+    }
+
+    .cmd-hint kbd {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--foreground);
+    }
+
+    @media (min-width: 900px) {
+      .cmd-hint { display: inline-flex; }
+    }
+
+    /* ---- Theme swatch popover ---- */
+    .theme-pop {
+      position: absolute;
+      top: 3.4rem;
+      right: 0;
+      display: none;
+      grid-template-columns: repeat(3, auto);
+      gap: 0.6rem;
+      padding: 0.85rem;
+      border-radius: 1rem;
+      z-index: 60;
+    }
+
+    .theme-pop.open { display: grid; }
+
+    .swatch {
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 9999px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .swatch:hover { transform: scale(1.15); }
+    .swatch.active { border-color: var(--foreground); }
+
+    /* ---- Command palette ---- */
+    .cmdk {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 14vh;
+      background: rgba(3, 3, 8, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      opacity: 0;
+      transition: opacity 0.18s ease;
+    }
+
+    .cmdk.open { display: flex; opacity: 1; }
+
+    .cmdk-panel {
+      width: 100%;
+      max-width: 34rem;
+      margin: 0 1rem;
+      border-radius: 1rem;
+      overflow: hidden;
+      transform: translateY(-8px) scale(0.98);
+      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cmdk.open .cmdk-panel { transform: translateY(0) scale(1); }
+
+    .cmdk-search {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.9rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cmdk-search svg {
+      width: 1.1rem;
+      height: 1.1rem;
+      color: var(--primary-glow);
+      flex-shrink: 0;
+    }
+
+    .cmdk-search input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--foreground);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+    }
+
+    .cmdk-search input::placeholder { color: var(--muted-foreground); }
+
+    .cmdk-esc {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      color: var(--muted-foreground);
+    }
+
+    .cmdk-list {
+      max-height: 46vh;
+      overflow-y: auto;
+      padding: 0.4rem;
+    }
+
+    .cmdk-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.8rem;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      color: var(--muted-foreground);
+      font-size: 0.9rem;
+    }
+
+    .cmdk-item .ci-icon {
+      display: grid;
+      place-items: center;
+      width: 1.9rem;
+      height: 1.9rem;
+      border-radius: 0.5rem;
+      background: color-mix(in oklab, var(--primary) 14%, transparent);
+      color: var(--primary-glow);
+      flex-shrink: 0;
+    }
+
+    .cmdk-item .ci-icon svg { width: 1rem; height: 1rem; }
+    .cmdk-item .ci-label { color: var(--foreground); font-weight: 500; }
+    .cmdk-item .ci-sub { margin-left: auto; font-family: var(--font-mono); font-size: 0.7rem; opacity: 0.7; }
+
+    .cmdk-item.active,
+    .cmdk-item:hover {
+      background: color-mix(in oklab, var(--primary) 16%, transparent);
+      color: var(--foreground);
+    }
+
+    .cmdk-empty {
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--muted-foreground);
+      font-size: 0.9rem;
+    }
+
+    /* ---- Stats strip ---- */
+    .stats-section { padding: 0 1.5rem; }
+
+    .stats-strip {
+      max-width: 72rem;
+      margin: -1rem auto 0;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      border-radius: calc(var(--radius) + 12px);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--border);
+    }
+
+    @media (min-width: 768px) {
+      .stats-strip { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .stat {
+      background: color-mix(in oklab, var(--surface) 70%, transparent);
+      padding: 1.75rem 1.25rem;
+      text-align: center;
+      transition: background 0.25s ease;
+    }
+
+    .stat:hover { background: var(--surface-elevated); }
+
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--foreground);
+    }
+
+    .stat-num .unit { color: var(--primary-glow); }
+
+    .stat-label {
+      margin-top: 0.35rem;
+      font-size: 0.8rem;
+      color: var(--muted-foreground);
+    }
+
+    /* ---- Project filter chips ---- */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .filter-chip {
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--surface) 70%, transparent);
+      padding: 0.4rem 0.9rem;
+      font-size: 0.82rem;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .filter-chip:hover {
+      border-color: color-mix(in oklab, var(--primary) 45%, transparent);
+      color: var(--foreground);
+    }
+
+    .filter-chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-foreground);
+    }
+
+    .filter-chip .count { opacity: 0.6; font-size: 0.72rem; }
+
+    .project-card.filtered-out {
+      opacity: 0;
+      transform: scale(0.9);
+      pointer-events: none;
+      display: none;
+    }
+
+    /* ---- Konami / party canvas ---- */
+    #konami-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      pointer-events: none;
+      display: none;
+    }
+
+    .konami-toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      z-index: 401;
+      padding: 0.75rem 1.4rem;
+      border-radius: 9999px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--foreground);
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    .konami-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ---- Hero name scramble ---- */
+    .scramble-name {
+      cursor: default;
+    }
+
+    .scramble-name .dud {
+      color: color-mix(in oklab, var(--primary-glow) 80%, white);
+      opacity: 0.85;
+    }
+
+    /* ---- Reduced motion ---- */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+      .floating-orb, .scroll-indicator { animation: none !important; }
+    }
+
+    /* =====================================================================
+       CINEMATIC MOTION LAYER
+       ===================================================================== */
+
+    /* ---- Site-wide 3D constellation canvas ---- */
+    #fx-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    /* ---- Custom magnetic ring cursor ---- */
+    .cursor-dot,
+    .cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      will-change: transform;
+    }
+    .cursor-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--primary-glow);
+      box-shadow: 0 0 10px color-mix(in oklab, var(--primary-glow) 70%, transparent);
+    }
+    .cursor-ring {
+      width: 34px;
+      height: 34px;
+      border: 1.5px solid color-mix(in oklab, var(--primary) 65%, transparent);
+      box-shadow: 0 0 18px color-mix(in oklab, var(--primary) 35%, transparent),
+                  inset 0 0 12px color-mix(in oklab, var(--primary) 12%, transparent);
+      transition: width .28s cubic-bezier(.16,1,.3,1),
+                  height .28s cubic-bezier(.16,1,.3,1),
+                  border-color .28s ease, background-color .28s ease, opacity .28s ease;
+    }
+    .cursor-ring.is-hover {
+      width: 58px;
+      height: 58px;
+      background: color-mix(in oklab, var(--primary) 10%, transparent);
+      border-color: color-mix(in oklab, var(--primary-glow) 80%, transparent);
+    }
+    .cursor-ring.is-down { width: 26px; height: 26px; }
+    html.has-custom-cursor,
+    html.has-custom-cursor * { cursor: none !important; }
+
+    /* ---- Holographic 3D tilt + glare on cards ---- */
+    .holo-tilt {
+      position: relative;
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s ease;
+    }
+    .holo-tilt.is-tilting { transition: box-shadow .35s ease; }
+    .holo-inner { transform: translateZ(0); }
+    .card-shine,
+    .card-glare {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    .card-shine {
+      z-index: 2;
+      background: radial-gradient(circle at var(--mx,50%) var(--my,50%),
+        color-mix(in oklab, var(--primary-glow) 32%, transparent) 0%,
+        color-mix(in oklab, var(--primary) 8%, transparent) 28%,
+        transparent 55%);
+      mix-blend-mode: screen;
+    }
+    .card-glare {
+      z-index: 3;
+      background: linear-gradient(105deg,
+        transparent 38%,
+        rgba(255,255,255,.16) 46%,
+        rgba(255,255,255,.05) 54%,
+        transparent 62%);
+      background-size: 260% 260%;
+      background-position: var(--gx,50%) var(--gy,50%);
+      mix-blend-mode: overlay;
+    }
+    .holo-tilt.is-tilting .card-shine,
+    .holo-tilt.is-tilting .card-glare { opacity: 1; }
+
+    /* ---- Scroll-driven 3D timeline unfold ---- */
+    .timeline { perspective: 1400px; }
+    .timeline-item.reveal {
+      opacity: 0;
+      transform: perspective(1400px) rotateX(-82deg) translateY(20px);
+      transform-origin: top center;
+      transition: opacity .8s cubic-bezier(.16,1,.3,1),
+                  transform .9s cubic-bezier(.16,1,.3,1);
+      backface-visibility: hidden;
+    }
+    .timeline-item.reveal.visible {
+      opacity: 1;
+      transform: perspective(1400px) rotateX(0deg) translateY(0);
+    }
+
+    /* ---- Scramble link hover ---- */
+    .link-scramble { position: relative; }
+    .scramble-glyph { color: var(--primary-glow); }
+
+    /* ---- Reduced motion / touch fallbacks ---- */
+    @media (prefers-reduced-motion: reduce) {
+      #fx-canvas { display: none; }
+      .cursor-dot, .cursor-ring { display: none !important; }
+      html.has-custom-cursor, html.has-custom-cursor * { cursor: auto !important; }
+      .timeline-item.reveal {
+        transform: translateY(16px) !important;
+      }
+      .timeline-item.reveal.visible { transform: none !important; }
+      .card-shine, .card-glare { display: none; }
+    }
+    @media (hover: none), (pointer: coarse) {
+      .cursor-dot, .cursor-ring { display: none !important; }
+      html.has-custom-cursor, html.has-custom-cursor * { cursor: auto !important; }
+    }
   </style>
+  <!-- Three.js (constellation background). Site degrades gracefully if it fails to load. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 
 <body>
-  <!-- Cursor glow follower -->
-  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+  <!-- Scroll progress -->
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+  <!-- Konami surprise layer -->
+  <canvas id="konami-canvas" aria-hidden="true"></canvas>
+  <div class="konami-toast glass" id="konamiToast" aria-hidden="true"></div>
+
+  <!-- Site-wide cinematic FX: 3D constellation background + custom magnetic cursor -->
+  <canvas id="fx-canvas" aria-hidden="true"></canvas>
+  <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
 
   <!-- ===== Navigation ===== -->
   <header class="nav-wrapper">
@@ -1360,8 +1958,31 @@
         <li><a href="#contact">Contact</a></li>
       </ul>
 
-      <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <a href="https://drive.google.com/file/d/1fWuwL72xLEUfO3zPu02P2LVlOGtS4aNc/view?usp=sharing"
+      <div style="display: flex; align-items: center; gap: 0.5rem; position: relative;">
+        <button class="cmd-hint" id="cmdHint" aria-label="Open command menu">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          Search
+          <kbd>&#8984;K</kbd>
+        </button>
+
+        <button class="nav-icon-btn" id="themeBtn" aria-label="Change accent color">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+          </svg>
+        </button>
+
+        <div class="theme-pop glass shadow-elegant" id="themePop" role="menu" aria-label="Accent colors"></div>
+
+        <a href="https://drive.google.com/file/d/1zADc7BWIJJ6LWtwy_XqlWxh0bYlz2yUr/view?usp=sharing"
           class="nav-resume shadow-glow">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1403,11 +2024,9 @@
       <div class="floating-orb" aria-hidden="true"></div>
       <div class="floating-orb" aria-hidden="true"></div>
       <div class="floating-orb" aria-hidden="true"></div>
-      <!-- Particle canvas -->
-      <canvas id="particles-canvas" aria-hidden="true"></canvas>
       <div class="hero-content">
         <h1 class="animate-in">
-          <span class="text-gradient">Tanishka Sonar</span><br />
+          <span class="text-gradient scramble-name" id="heroName" data-text="Tanishka Sonar">Tanishka Sonar</span><br />
           <span class="text-muted">Masters in CS Student · <br><span class="text-gradient">Rice
               University.</span>
         </h1>
@@ -1454,6 +2073,28 @@
         </a>
       </div>
     </section>
+
+    <!-- ===== Stats Strip ===== -->
+    <div class="stats-section">
+      <div class="stats-strip reveal" id="statsStrip">
+        <div class="stat">
+          <div class="stat-num" data-to="94" data-suffix="%"><span>0</span><span class="unit">%</span></div>
+          <div class="stat-label">Model accuracy achieved</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" data-to="5" data-suffix="K+"><span>0</span><span class="unit">K+</span></div>
+          <div class="stat-label">Support tickets analyzed</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" data-to="80" data-suffix="+"><span>0</span><span class="unit">+</span></div>
+          <div class="stat-label">Students mentored as TA</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" data-to="2" data-suffix=""><span>0</span></div>
+          <div class="stat-label">Research papers</div>
+        </div>
+      </div>
+    </div>
 
     <!-- ===== About Section ===== -->
     <section id="about">
@@ -1511,6 +2152,7 @@
                 <span class="skill-tag">Matplotlib</span>
                 <span class="skill-tag">Node.js</span>
                 <span class="skill-tag">FastAPI</span>
+                <span class="skill-tag">gRPC</span>
                 <span class="skill-tag">NLTK</span>
               </div>
             </div>
@@ -1543,8 +2185,10 @@
               <h3>Cloud &amp; DevOps</h3>
               <div class="skills-tags">
                 <span class="skill-tag">AWS (EC2, S3)</span>
+                <span class="skill-tag">GCP</span>
                 <span class="skill-tag">Docker</span>
                 <span class="skill-tag">Kubernetes</span>
+                <span class="skill-tag">GKE</span>
                 <span class="skill-tag">Helm</span>
                 <span class="skill-tag">Terraform</span>
                 <span class="skill-tag">Prometheus</span>
@@ -1576,11 +2220,12 @@
         <div class="projects-header reveal">
           <p class="section-label">02 — Selected work</p>
           <h2 class="section-title">Projects I'm proud of.</h2>
+          <div class="filter-bar" id="filterBar" role="tablist" aria-label="Filter projects by focus area"></div>
         </div>
 
         <div class="projects-grid">
           <!-- Project 1 -->
-          <article class="project-card reveal">
+          <article class="project-card reveal" data-cat="ai-ml">
             <div class="project-header">
               <div class="project-number">01</div>
               <div class="project-links">
@@ -1613,7 +2258,7 @@
           </article>
 
           <!-- Project 3 -->
-          <article class="project-card reveal" style="transition-delay: 0.2s;">
+          <article class="project-card reveal" data-cat="systems" style="transition-delay: 0.2s;">
             <div class="project-header">
               <div class="project-number">02</div>
               <div class="project-links">
@@ -1646,7 +2291,7 @@
           </article>
 
           <!-- Project 2 -->
-          <article class="project-card reveal" style="transition-delay: 0.1s;">
+          <article class="project-card reveal" data-cat="quantum" style="transition-delay: 0.1s;">
             <div class="project-header">
               <div class="project-number">03</div>
               <div class="project-links">
@@ -1680,7 +2325,7 @@
 
 
           <!-- Project 4 -->
-          <article class="project-card reveal" style="transition-delay: 0.1s;">
+          <article class="project-card reveal" data-cat="ai-ml" style="transition-delay: 0.1s;">
             <div class="project-header">
               <div class="project-number">04</div>
               <div class="project-links">
@@ -1712,7 +2357,7 @@
           </article>
 
           <!-- Project 5 -->
-          <article class="project-card reveal" style="transition-delay: 0.2s;">
+          <article class="project-card reveal" data-cat="fullstack" style="transition-delay: 0.2s;">
             <div class="project-header">
               <div class="project-number">05</div>
               <div class="project-links">
@@ -1765,13 +2410,62 @@
     <section id="experience">
       <div class="section-inner">
         <div class="experience-header reveal">
-          <p class="section-label">03 — Extracurriculars</p>
-          <h2 class="section-title">Leadership &amp; communities.</h2>
+          <p class="section-label">03 — Experience</p>
+          <h2 class="section-title">Where I've worked.</h2>
         </div>
 
         <ol class="timeline">
-          <!-- Item 1 -->
+          <!-- Gruve.ai -->
           <li class="timeline-item reveal">
+            <span class="timeline-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                <rect x="9" y="9" width="6" height="6"></rect>
+                <path d="M15 2v2"></path><path d="M15 20v2"></path>
+                <path d="M2 15h2"></path><path d="M2 9h2"></path>
+                <path d="M20 15h2"></path><path d="M20 9h2"></path>
+                <path d="M9 2v2"></path><path d="M9 20v2"></path>
+              </svg>
+            </span>
+            <div class="timeline-card glass">
+              <div class="timeline-card-header">
+                <h3>Software Engineering Intern</h3>
+                <span class="date">Jun 2026 — Present</span>
+              </div>
+              <span class="role-org">Gruve.ai · Houston, TX</span>
+              <p>Building the control plane for a GPU Job-as-a-Service platform on Kubernetes (GKE) — job orchestration
+                and a reconciliation loop in Python, gRPC, and PostgreSQL. Shipped keyless GCS auth via Workload
+                Identity and an engine-agnostic deploy API for KServe inference (vLLM, Triton), replacing hand-written
+                YAML with a single call.</p>
+            </div>
+          </li>
+
+          <!-- Rice T&I -->
+          <li class="timeline-item reveal" style="transition-delay: 0.08s;">
+            <span class="timeline-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="6" x2="6" y1="3" y2="15"></line>
+                <circle cx="18" cy="6" r="3"></circle>
+                <circle cx="6" cy="18" r="3"></circle>
+                <path d="M18 9a9 9 0 0 1-9 9"></path>
+              </svg>
+            </span>
+            <div class="timeline-card glass">
+              <div class="timeline-card-header">
+                <h3>Software &amp; DevOps Engineering Intern</h3>
+                <span class="date">Jan 2026 — May 2026</span>
+              </div>
+              <span class="role-org">Rice University · Transformational Technology &amp; Innovation</span>
+              <p>Built a BERT-based ticket sentiment system with NLP pipelines that hit 88% accuracy on 5,000+ tickets
+                and cut triage time by 35%, wired into the existing ticketing stack to prioritize IT support by the
+                data.</p>
+            </div>
+          </li>
+
+          <!-- Rice TA -->
+          <li class="timeline-item reveal" style="transition-delay: 0.16s;">
             <span class="timeline-icon" aria-hidden="true">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1783,59 +2477,76 @@
             </span>
             <div class="timeline-card glass">
               <div class="timeline-card-header">
-                <h3>Teaching Assistant</h3>
-                <span class="org">Rice University</span>
+                <h3>Graduate Teaching Assistant</h3>
+                <span class="date">Sep 2025 — May 2026</span>
               </div>
-              <p>Instructed students in Probabilistic Data Structures &amp; Algorithms and Data Science. Mentored 80+
-                students through algorithm design and ML pipelines; invited to continue for the upcoming semester due to
-                high performance.</p>
+              <span class="role-org">Rice University · Probabilistic Algorithms &amp; Data Science</span>
+              <p>Ran office hours and mentored 80+ graduate students end-to-end on probabilistic algorithms, statistical
+                modeling, and applied ML pipelines — lifting average project scores by 20%.</p>
             </div>
           </li>
 
-          <!-- Item 2 -->
-          <li class="timeline-item reveal" style="transition-delay: 0.1s;">
+          <!-- ESDS -->
+          <li class="timeline-item reveal" style="transition-delay: 0.24s;">
             <span class="timeline-icon" aria-hidden="true">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path
-                  d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z">
-                </path>
-                <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
-                <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
-                <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
-                <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                <path d="M3 5V19A9 3 0 0 0 21 19V5"></path>
+                <path d="M3 12A9 3 0 0 0 21 12"></path>
               </svg>
             </span>
             <div class="timeline-card glass">
               <div class="timeline-card-header">
+                <h3>Software Engineering Intern</h3>
+                <span class="date">Jun 2023 — Jul 2023</span>
+              </div>
+              <span class="role-org">ESDS Software Solution · Nashik, India</span>
+              <p>Built an employee record management system in PHP + MySQL automating workflows for 200+ records, and
+                deployed and monitored AWS (EC2, S3) infrastructure at 99.9% uptime.</p>
+            </div>
+          </li>
+
+        </ol>
+
+        <div class="leadership-block">
+          <p class="section-label">Leadership &amp; community</p>
+          <div class="leadership-grid">
+            <article class="leadership-card glass">
+              <span class="leadership-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path>
+                  <path d="M9 18h6"></path>
+                  <path d="M10 22h4"></path>
+                </svg>
+              </span>
+              <div>
                 <h3>Creative Head</h3>
                 <span class="org">CSI, FCRIT</span>
+                <p>Led a creative team on visual branding and marketing for major technical symposiums, driving a 40%
+                  increase in event registrations.</p>
               </div>
-              <p>Led a creative team to design visual branding and marketing for major technical symposiums, driving a
-                40% increase in event registrations.</p>
-            </div>
-          </li>
+            </article>
 
-          <!-- Item 3 -->
-          <li class="timeline-item reveal" style="transition-delay: 0.2s;">
-            <span class="timeline-icon" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path
-                  d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5">
-                </path>
-              </svg>
-            </span>
-            <div class="timeline-card glass">
-              <div class="timeline-card-header">
+            <article class="leadership-card glass">
+              <span class="leadership-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5">
+                  </path>
+                </svg>
+              </span>
+              <div>
                 <h3>NSS Volunteer</h3>
                 <span class="org">FCRIT</span>
+                <p>Dedicated 240+ hours to community development, educational tutoring, and public-health drives for
+                  200+ local residents through a special 7-day camp.</p>
               </div>
-              <p>Dedicated 240+ hours to leading community development, educational tutoring, and public health drives
-                for 200+ local residents by participating in a special 7-day camp.</p>
-            </div>
-          </li>
-        </ol>
+            </article>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1850,15 +2561,15 @@
         <div class="life-grid">
           <!-- Volleyball -->
           <div class="life-card reveal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M10 14.66v1.626a2 2 0 0 1-.976 1.696A5 5 0 0 0 7 21.978"></path>
-              <path d="M14 14.66v1.626a2 2 0 0 0 .976 1.696A5 5 0 0 1 17 21.978"></path>
-              <path d="M18 9h1.5a1 1 0 0 0 0-5H18"></path>
-              <path d="M4 22h16"></path>
-              <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"></path>
-              <path d="M6 9H4.5a1 1 0 0 1 0-5H6"></path>
-            </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 14.66v1.626a2 2 0 0 1-.976 1.696A5 5 0 0 0 7 21.978"></path>
+                <path d="M14 14.66v1.626a2 2 0 0 0 .976 1.696A5 5 0 0 1 17 21.978"></path>
+                <path d="M18 9h1.5a1 1 0 0 0 0-5H18"></path>
+                <path d="M4 22h16"></path>
+                <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"></path>
+                <path d="M6 9H4.5a1 1 0 0 1 0-5H6"></path>
+              </svg>
             <h3>Volleyball Player</h3>
             <p>Competitive team athlete</p>
           </div>
@@ -1934,6 +2645,22 @@
   <footer>
     <p>&copy; 2026 Tanishka Sonar. Crafted with care.</p>
   </footer>
+
+  <!-- ===== Command Palette ===== -->
+  <div class="cmdk" id="cmdk" role="dialog" aria-modal="true" aria-label="Command menu">
+    <div class="cmdk-panel glass shadow-elegant">
+      <div class="cmdk-search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input id="cmdkInput" type="text" placeholder="Jump to a section, copy my email, open a project..." autocomplete="off" />
+        <span class="cmdk-esc">ESC</span>
+      </div>
+      <div class="cmdk-list" id="cmdkList"></div>
+    </div>
+  </div>
 
   <!-- ===== JavaScript ===== -->
   <script>
@@ -2024,28 +2751,7 @@
       });
     }, { passive: true });
 
-    // ========== Cursor glow follower ==========
-    const cursorGlow = document.getElementById('cursorGlow');
-    let cursorX = 0, cursorY = 0, glowX = 0, glowY = 0;
-
-    document.addEventListener('mousemove', (e) => {
-      cursorX = e.clientX;
-      cursorY = e.clientY;
-    });
-
-    function animateCursorGlow() {
-      glowX += (cursorX - glowX) * 0.08;
-      glowY += (cursorY - glowY) * 0.08;
-      cursorGlow.style.left = glowX + 'px';
-      cursorGlow.style.top = glowY + 'px';
-      requestAnimationFrame(animateCursorGlow);
-    }
-    animateCursorGlow();
-
-    // Hide cursor glow on mobile
-    if ('ontouchstart' in window) {
-      cursorGlow.style.display = 'none';
-    }
+    // (Cursor glow follower retired — replaced by the custom magnetic ring cursor below.)
 
     // ========== Parallax on hero elements ==========
     const heroTitle = document.querySelector('.hero h1');
@@ -2063,26 +2769,7 @@
       }
     }, { passive: true });
 
-    // ========== 3D Tilt on project cards ==========
-    document.querySelectorAll('.project-card').forEach(card => {
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const rotateX = ((y - centerY) / centerY) * -4;
-        const rotateY = ((x - centerX) / centerX) * 4;
-
-        card.classList.add('tilting');
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
-      });
-
-      card.addEventListener('mouseleave', () => {
-        card.classList.remove('tilting');
-        card.style.transform = '';
-      });
-    });
+    // (Basic card tilt retired — replaced by the holographic tilt + glare in the cinematic layer below.)
 
     // ========== Life card mouse-follow gradient ==========
     document.querySelectorAll('.life-card').forEach(card => {
@@ -2095,21 +2782,7 @@
       });
     });
 
-    // ========== Magnetic button effect ==========
-    document.querySelectorAll('.btn-primary, .btn-secondary, .nav-resume, .contact-btn-primary, .contact-btn-secondary').forEach(btn => {
-      btn.classList.add('magnetic-btn');
-
-      btn.addEventListener('mousemove', (e) => {
-        const rect = btn.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
-      });
-
-      btn.addEventListener('mouseleave', () => {
-        btn.style.transform = '';
-      });
-    });
+    // (Basic magnetic buttons retired — replaced by spring-based magnetic DOM warp in the cinematic layer below.)
 
     // ========== Timeline line draw animation ==========
     const timeline = document.querySelector('.timeline');
@@ -2126,96 +2799,7 @@
       timelineObserver.observe(timeline);
     }
 
-    // ========== Hero particles canvas ==========
-    const canvas = document.getElementById('particles-canvas');
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      let particles = [];
-      let animId;
-
-      function resizeCanvas() {
-        const hero = canvas.parentElement;
-        canvas.width = hero.offsetWidth;
-        canvas.height = hero.offsetHeight;
-      }
-
-      function createParticles() {
-        particles = [];
-        const count = Math.floor((canvas.width * canvas.height) / 15000);
-        for (let i = 0; i < Math.min(count, 80); i++) {
-          particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * 0.3,
-            vy: (Math.random() - 0.5) * 0.3,
-            radius: Math.random() * 1.5 + 0.5,
-            opacity: Math.random() * 0.4 + 0.1
-          });
-        }
-      }
-
-      function drawParticles() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        particles.forEach((p, i) => {
-          p.x += p.vx;
-          p.y += p.vy;
-
-          // Wrap around
-          if (p.x < 0) p.x = canvas.width;
-          if (p.x > canvas.width) p.x = 0;
-          if (p.y < 0) p.y = canvas.height;
-          if (p.y > canvas.height) p.y = 0;
-
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(167, 139, 250, ${p.opacity})`;
-          ctx.fill();
-
-          // Draw connections to nearby particles
-          for (let j = i + 1; j < particles.length; j++) {
-            const p2 = particles[j];
-            const dx = p.x - p2.x;
-            const dy = p.y - p2.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < 120) {
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = `rgba(124, 92, 252, ${0.06 * (1 - dist / 120)})`;
-              ctx.lineWidth = 0.5;
-              ctx.stroke();
-            }
-          }
-        });
-
-        animId = requestAnimationFrame(drawParticles);
-      }
-
-      resizeCanvas();
-      createParticles();
-      drawParticles();
-
-      window.addEventListener('resize', () => {
-        resizeCanvas();
-        createParticles();
-      });
-
-      // Pause particles when not visible for performance
-      const heroSection = document.getElementById('top');
-      const particleObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) {
-            cancelAnimationFrame(animId);
-          } else {
-            drawParticles();
-          }
-        });
-      }, { threshold: 0 });
-
-      particleObserver.observe(heroSection);
-    }
+    // (Hero 2D particle canvas retired — replaced by the site-wide Three.js constellation in the cinematic layer below.)
 
     // ========== Typewriter effect for subtitle ==========
     const subtitleEl = document.querySelector('.hero-subtitle');
@@ -2247,7 +2831,623 @@
       // Start typewriter after hero animation completes
       setTimeout(typeWriter, 900);
     }
+
+    /* =====================================================================
+       NEW INTERACTIVE LAYER
+       ===================================================================== */
+    (function () {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* ---------- Scroll progress bar ---------- */
+      const progress = document.getElementById('scrollProgress');
+      function updateProgress() {
+        const h = document.documentElement;
+        const max = h.scrollHeight - h.clientHeight;
+        const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+        progress.style.width = pct + '%';
+      }
+      window.addEventListener('scroll', updateProgress, { passive: true });
+      updateProgress();
+
+      /* ---------- Accent theme switcher ---------- */
+      const THEMES = [
+        { id: 'violet',  primary: '#7c5cfc', glow: '#a78bfa' },
+        { id: 'cyan',    primary: '#22d3ee', glow: '#67e8f9' },
+        { id: 'emerald', primary: '#10b981', glow: '#6ee7b7' },
+        { id: 'amber',   primary: '#f59e0b', glow: '#fcd34d' },
+        { id: 'rose',    primary: '#f43f5e', glow: '#fb7185' },
+        { id: 'blue',    primary: '#3b82f6', glow: '#93c5fd' },
+      ];
+      const themePop = document.getElementById('themePop');
+      const themeBtn = document.getElementById('themeBtn');
+
+      function applyTheme(id) {
+        const t = THEMES.find(x => x.id === id) || THEMES[0];
+        document.documentElement.style.setProperty('--primary', t.primary);
+        document.documentElement.style.setProperty('--primary-glow', t.glow);
+        try { localStorage.setItem('accent', t.id); } catch (e) {}
+        themePop.querySelectorAll('.swatch').forEach(s =>
+          s.classList.toggle('active', s.dataset.id === t.id));
+      }
+
+      THEMES.forEach(t => {
+        const s = document.createElement('button');
+        s.className = 'swatch';
+        s.dataset.id = t.id;
+        s.setAttribute('aria-label', t.id + ' accent');
+        s.style.background = `linear-gradient(135deg, ${t.primary}, ${t.glow})`;
+        s.addEventListener('click', () => { applyTheme(t.id); themePop.classList.remove('open'); });
+        themePop.appendChild(s);
+      });
+
+      let savedTheme = 'violet';
+      try { savedTheme = localStorage.getItem('accent') || 'violet'; } catch (e) {}
+      applyTheme(savedTheme);
+
+      themeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        themePop.classList.toggle('open');
+      });
+      document.addEventListener('click', (e) => {
+        if (!themePop.contains(e.target) && e.target !== themeBtn) themePop.classList.remove('open');
+      });
+
+      /* ---------- Command palette ---------- */
+      const cmdk = document.getElementById('cmdk');
+      const cmdkInput = document.getElementById('cmdkInput');
+      const cmdkList = document.getElementById('cmdkList');
+      const cmdHint = document.getElementById('cmdHint');
+
+      function icon(paths) {
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+      }
+      const I = {
+        arrow: '<path d="M7 7h10v10"></path><path d="M7 17 17 7"></path>',
+        user: '<circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path>',
+        folder: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path>',
+        mail: '<rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>',
+        doc: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path>',
+        link: '<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"></path><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"></path>',
+        copy: '<rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>',
+        paint: '<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.6 0-.5-.2-.9-.4-1.2-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.6-1.6H16c3 0 5.5-2.5 5.5-5.6C21.9 6 17.4 2 12 2z"></path>',
+      };
+
+      const EMAIL = 'sonartanishka357@gmail.com';
+      function toast(msg) {
+        const t = document.getElementById('konamiToast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(t._t);
+        t._t = setTimeout(() => t.classList.remove('show'), 1800);
+      }
+
+      const COMMANDS = [
+        { label: 'About', sub: 'section', ic: I.user, run: () => go('#about') },
+        { label: 'Projects', sub: 'section', ic: I.folder, run: () => go('#projects') },
+        { label: 'Experience', sub: 'section', ic: I.user, run: () => go('#experience') },
+        { label: 'Life', sub: 'section', ic: I.paint, run: () => go('#life') },
+        { label: 'Contact', sub: 'section', ic: I.mail, run: () => go('#contact') },
+        { label: 'Copy email address', sub: 'action', ic: I.copy, run: () => {
+            navigator.clipboard?.writeText(EMAIL).then(() => toast('Email copied  ✓'))
+              .catch(() => toast(EMAIL)); } },
+        { label: 'Send me an email', sub: 'link', ic: I.mail, run: () => location.href = 'mailto:' + EMAIL },
+        { label: 'Open resume', sub: 'link', ic: I.doc, run: () => window.open('https://drive.google.com/file/d/1fWuwL72xLEUfO3zPu02P2LVlOGtS4aNc/view?usp=sharing', '_blank') },
+        { label: 'LinkedIn', sub: 'link', ic: I.link, run: () => window.open('https://www.linkedin.com/in/tanishka-sonar-73a35a233/', '_blank') },
+        { label: 'GitHub', sub: 'link', ic: I.link, run: () => window.open('https://github.com/tanishkasonar22', '_blank') },
+        { label: 'AI Interview Simulator', sub: 'project', ic: I.folder, run: () => window.open('https://github.com/xqsong-angie/Realtime-Coding-Interviewer', '_blank') },
+        { label: 'Siren — IoT Telemetry Pipeline', sub: 'project', ic: I.folder, run: () => window.open('https://github.com/tanishkasonar22/Siren', '_blank') },
+        { label: 'Quantum Traffic Optimization', sub: 'project', ic: I.folder, run: () => window.open('https://github.com/tanishkasonar22/Traffic-optimisation-using-Quantum-Computing-', '_blank') },
+        { label: 'Cycle accent color', sub: 'action', ic: I.paint, run: () => {
+            const cur = THEMES.findIndex(x => x.id === (localStorage.getItem('accent') || 'violet'));
+            applyTheme(THEMES[(cur + 1) % THEMES.length].id); } },
+      ];
+
+      let filtered = COMMANDS.slice();
+      let activeIdx = 0;
+
+      function go(hash) {
+        closeCmdk();
+        const el = document.querySelector(hash);
+        if (el) el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
+      }
+
+      function renderCmdk() {
+        cmdkList.innerHTML = '';
+        if (!filtered.length) {
+          cmdkList.innerHTML = '<div class="cmdk-empty">No matches. Try “email”, “resume”, or a section.</div>';
+          return;
+        }
+        filtered.forEach((c, i) => {
+          const row = document.createElement('div');
+          row.className = 'cmdk-item' + (i === activeIdx ? ' active' : '');
+          row.innerHTML = `<span class="ci-icon">${icon(c.ic)}</span><span class="ci-label">${c.label}</span><span class="ci-sub">${c.sub}</span>`;
+          row.addEventListener('click', () => c.run());
+          row.addEventListener('mousemove', () => { activeIdx = i; highlight(); });
+          cmdkList.appendChild(row);
+        });
+      }
+      function highlight() {
+        [...cmdkList.children].forEach((el, i) => el.classList.toggle('active', i === activeIdx));
+      }
+      function search(q) {
+        q = q.trim().toLowerCase();
+        filtered = q ? COMMANDS.filter(c => (c.label + ' ' + c.sub).toLowerCase().includes(q)) : COMMANDS.slice();
+        activeIdx = 0;
+        renderCmdk();
+      }
+      function openCmdk() {
+        cmdk.classList.add('open');
+        cmdkInput.value = '';
+        search('');
+        setTimeout(() => cmdkInput.focus(), 40);
+      }
+      function closeCmdk() { cmdk.classList.remove('open'); }
+
+      cmdHint.addEventListener('click', openCmdk);
+      cmdkInput.addEventListener('input', e => search(e.target.value));
+      cmdk.addEventListener('click', e => { if (e.target === cmdk) closeCmdk(); });
+
+      document.addEventListener('keydown', e => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          cmdk.classList.contains('open') ? closeCmdk() : openCmdk();
+          return;
+        }
+        if (!cmdk.classList.contains('open')) return;
+        if (e.key === 'Escape') { closeCmdk(); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, filtered.length - 1); highlight(); scrollActive(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); highlight(); scrollActive(); }
+        else if (e.key === 'Enter') { e.preventDefault(); filtered[activeIdx]?.run(); }
+      });
+      function scrollActive() {
+        cmdkList.children[activeIdx]?.scrollIntoView({ block: 'nearest' });
+      }
+
+      /* ---------- Stats counters ---------- */
+      const statsStrip = document.getElementById('statsStrip');
+      if (statsStrip) {
+        const runCount = () => {
+          statsStrip.querySelectorAll('.stat-num').forEach(el => {
+            const to = parseInt(el.dataset.to, 10);
+            const numSpan = el.querySelector('span');
+            if (reduceMotion) { numSpan.textContent = to; return; }
+            const dur = 1400, start = performance.now();
+            const step = now => {
+              const p = Math.min((now - start) / dur, 1);
+              const eased = 1 - Math.pow(1 - p, 3);
+              numSpan.textContent = Math.round(eased * to);
+              if (p < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+          });
+        };
+        const so = new IntersectionObserver((entries) => {
+          entries.forEach(en => { if (en.isIntersecting) { runCount(); so.unobserve(en.target); } });
+        }, { threshold: 0.4 });
+        so.observe(statsStrip);
+      }
+
+      /* ---------- Project filtering ---------- */
+      const filterBar = document.getElementById('filterBar');
+      const cards = [...document.querySelectorAll('.project-card[data-cat]')];
+      if (filterBar && cards.length) {
+        const LABELS = { 'all': 'All', 'ai-ml': 'AI / ML', 'systems': 'Systems & DevOps', 'quantum': 'Quantum', 'fullstack': 'Full-Stack' };
+        const counts = {};
+        cards.forEach(c => { counts[c.dataset.cat] = (counts[c.dataset.cat] || 0) + 1; });
+        const cats = ['all', ...Object.keys(LABELS).filter(k => k !== 'all' && counts[k])];
+
+        cats.forEach((cat, i) => {
+          const chip = document.createElement('button');
+          chip.className = 'filter-chip' + (i === 0 ? ' active' : '');
+          chip.dataset.cat = cat;
+          const n = cat === 'all' ? cards.length : counts[cat];
+          chip.innerHTML = `${LABELS[cat]} <span class="count">${n}</span>`;
+          chip.addEventListener('click', () => {
+            filterBar.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            cards.forEach(card => {
+              const show = cat === 'all' || card.dataset.cat === cat;
+              card.classList.toggle('filtered-out', !show);
+            });
+          });
+          filterBar.appendChild(chip);
+        });
+      }
+
+      /* ---------- Hero name scramble ---------- */
+      const heroName = document.getElementById('heroName');
+      if (heroName && !reduceMotion) {
+        const CH = '!<>-_\\/[]{}—=+*^?#________';
+        function scramble(el, finalText, frames = 34) {
+          // Lock width so glyph-width changes don't move the hover edge and
+          // re-fire mouseenter in a loop.
+          el.style.display = 'inline-block';
+          el.style.minWidth = el.offsetWidth + 'px';
+          let frame = 0;
+          const chars = finalText.split('');
+          const clearAt = chars.map((_, i) => Math.floor(i * 1.2) + Math.floor(Math.random() * 8));
+          const tick = () => {
+            let out = '';
+            for (let i = 0; i < chars.length; i++) {
+              if (frame >= clearAt[i]) out += chars[i];
+              else if (chars[i] === ' ') out += ' ';
+              else out += `<span class="dud">${CH[Math.floor(Math.random() * CH.length)]}</span>`;
+            }
+            el.innerHTML = out;
+            frame++;
+            if (frame <= Math.max(...clearAt) + 1) requestAnimationFrame(tick);
+            else el.textContent = finalText;
+          };
+          tick();
+        }
+        const finalText = heroName.dataset.text;
+        setTimeout(() => scramble(heroName, finalText), 250);
+        let armed = true;
+        heroName.addEventListener('mouseenter', () => {
+          if (!armed) return;
+          armed = false;
+          scramble(heroName, finalText);
+        });
+        heroName.addEventListener('mouseleave', () => { armed = true; });
+      }
+
+      /* ---------- Konami code → confetti burst ---------- */
+      const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+      let pos = 0;
+      document.addEventListener('keydown', e => {
+        const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+        pos = (k === seq[pos]) ? pos + 1 : (k === seq[0] ? 1 : 0);
+        if (pos === seq.length) { pos = 0; party(); }
+      });
+
+      function party() {
+        toast('🎉 you found the secret — thanks for looking closely');
+        if (reduceMotion) return;
+        const cv = document.getElementById('konami-canvas');
+        cv.style.display = 'block';
+        cv.width = innerWidth; cv.height = innerHeight;
+        const ctx = cv.getContext('2d');
+        const colors = ['#7c5cfc','#a78bfa','#22d3ee','#f59e0b','#f43f5e','#10b981'];
+        const bits = Array.from({ length: 160 }, () => ({
+          x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * 0.4,
+          vx: (Math.random() - 0.5) * 4, vy: 3 + Math.random() * 5,
+          size: 5 + Math.random() * 7, rot: Math.random() * 6.28,
+          vr: (Math.random() - 0.5) * 0.3, color: colors[Math.floor(Math.random() * colors.length)]
+        }));
+        const start = performance.now();
+        (function frame(now) {
+          ctx.clearRect(0, 0, cv.width, cv.height);
+          bits.forEach(b => {
+            b.x += b.vx; b.y += b.vy; b.vy += 0.06; b.rot += b.vr;
+            ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.rot);
+            ctx.fillStyle = b.color; ctx.fillRect(-b.size / 2, -b.size / 2, b.size, b.size * 0.6);
+            ctx.restore();
+          });
+          if (now - start < 3200) requestAnimationFrame(frame);
+          else { ctx.clearRect(0, 0, cv.width, cv.height); cv.style.display = 'none'; }
+        })(start);
+      }
+    })();
+
+    /* =====================================================================
+       CINEMATIC MOTION LAYER
+       — custom magnetic cursor, spring magnetics, holographic tilt,
+         scramble links, and a Three.js constellation background.
+       ===================================================================== */
+    (function () {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const finePointer = window.matchMedia('(pointer: fine)').matches && !('ontouchstart' in window);
+      const lerp = (a, b, t) => a + (b - a) * t;
+      const accent = () => {
+        const cs = getComputedStyle(document.documentElement);
+        return {
+          primary: (cs.getPropertyValue('--primary') || '#7c5cfc').trim(),
+          glow: (cs.getPropertyValue('--primary-glow') || '#a78bfa').trim(),
+        };
+      };
+
+      /* pointer position, shared by cursor + magnetics + constellation */
+      const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2, has: false };
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX; mouse.y = e.clientY; mouse.has = true;
+      }, { passive: true });
+
+      /* ---------- Custom magnetic ring cursor ---------- */
+      const ring = document.getElementById('cursorRing');
+      const dot = document.getElementById('cursorDot');
+      let rx = mouse.x, ry = mouse.y;              // ring (spring-lagged)
+      let captureX = null, captureY = null;        // magnetic capture point
+
+      if (finePointer && !reduceMotion) {
+        document.documentElement.classList.add('has-custom-cursor');
+        const setHover = (on) => ring && ring.classList.toggle('is-hover', on);
+        const interactiveSel = 'a, button, .holo-tilt, [data-magnetic], input, .filter-chip, .swatch';
+        document.addEventListener('pointerover', (e) => {
+          if (e.target.closest && e.target.closest(interactiveSel)) setHover(true);
+        });
+        document.addEventListener('pointerout', (e) => {
+          if (e.target.closest && e.target.closest(interactiveSel) &&
+              !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(interactiveSel))) setHover(false);
+        });
+        window.addEventListener('mousedown', () => ring && ring.classList.add('is-down'));
+        window.addEventListener('mouseup', () => ring && ring.classList.remove('is-down'));
+        document.addEventListener('mouseleave', () => { if (ring) ring.style.opacity = '0'; if (dot) dot.style.opacity = '0'; });
+        document.addEventListener('mouseenter', () => { if (ring) ring.style.opacity = '1'; if (dot) dot.style.opacity = '1'; });
+      } else if (ring && dot) {
+        ring.style.display = 'none'; dot.style.display = 'none';
+      }
+
+      /* ---------- Spring-based magnetic DOM warp ---------- */
+      const magnets = [];
+      if (finePointer && !reduceMotion) {
+        const register = (sel, strength) => {
+          document.querySelectorAll(sel).forEach(el => {
+            if (el.__mag) return; el.__mag = true;
+            el.setAttribute('data-magnetic', '');
+            magnets.push({ el, strength, cx: 0, cy: 0, tx: 0, ty: 0, active: false });
+          });
+        };
+        register('.btn-primary, .btn-secondary, .nav-resume, .contact-btn-primary, .contact-btn-secondary', 0.28);
+        register('.social-icon, .nav-icon-btn, .cmd-hint', 0.4);
+      }
+
+      /* ---------- Holographic 3D tilt + glare ---------- */
+      const tiltCards = [];
+      if (!reduceMotion) {
+        document.querySelectorAll('.project-card, .skills-card').forEach(card => {
+          const shine = document.createElement('div'); shine.className = 'card-shine';
+          const glare = document.createElement('div'); glare.className = 'card-glare';
+          card.appendChild(shine); card.appendChild(glare);
+          card.classList.add('holo-tilt');
+          const max = card.classList.contains('skills-card') ? 6 : 9;
+          card.addEventListener('pointermove', (e) => {
+            const r = card.getBoundingClientRect();
+            const px = (e.clientX - r.left) / r.width;
+            const py = (e.clientY - r.top) / r.height;
+            const rotX = (0.5 - py) * 2 * max;
+            const rotY = (px - 0.5) * 2 * max;
+            card.classList.add('is-tilting');
+            card.style.transform =
+              `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateZ(6px)`;
+            card.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
+            card.style.setProperty('--my', (py * 100).toFixed(1) + '%');
+            card.style.setProperty('--gx', (px * 100).toFixed(1) + '%');
+            card.style.setProperty('--gy', (py * 100).toFixed(1) + '%');
+          });
+          card.addEventListener('pointerleave', () => {
+            card.classList.remove('is-tilting');
+            card.style.transform = '';
+          });
+        });
+      }
+
+      /* ---------- Scramble-on-hover for text links ---------- */
+      if (!reduceMotion) {
+        const glyphs = '!<>-_\\/[]{}=+*^?#01';
+        document.querySelectorAll('.nav-links a').forEach(link => {
+          link.classList.add('link-scramble');
+          const original = link.textContent;
+          let raf = null, frame = 0;
+          link.addEventListener('mouseenter', () => {
+            cancelAnimationFrame(raf); frame = 0;
+            const len = original.length;
+            const run = () => {
+              let out = '';
+              const revealed = Math.floor(frame / 2);
+              for (let i = 0; i < len; i++) {
+                if (i < revealed || original[i] === ' ') out += original[i];
+                else out += glyphs[(Math.random() * glyphs.length) | 0];
+              }
+              link.textContent = out;
+              frame++;
+              if (revealed <= len) raf = requestAnimationFrame(run);
+              else link.textContent = original;
+            };
+            run();
+          });
+          link.addEventListener('mouseleave', () => {
+            cancelAnimationFrame(raf); link.textContent = original;
+          });
+        });
+      }
+
+      /* ---------- Three.js constellation background ---------- */
+      let three = null;
+      function initConstellation() {
+        if (reduceMotion || !window.THREE) return;
+        const canvas = document.getElementById('fx-canvas');
+        if (!canvas) return;
+        const THREE = window.THREE;
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+        renderer.setClearColor(0x000000, 0);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, 1, 1, 2000);
+        camera.position.z = 420;
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // soft round sprite for glowy points
+        const sprite = (() => {
+          const c = document.createElement('canvas'); c.width = c.height = 64;
+          const g = c.getContext('2d');
+          const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+          grd.addColorStop(0, 'rgba(255,255,255,1)');
+          grd.addColorStop(0.25, 'rgba(255,255,255,0.85)');
+          grd.addColorStop(1, 'rgba(255,255,255,0)');
+          g.fillStyle = grd; g.beginPath(); g.arc(32, 32, 32, 0, Math.PI * 2); g.fill();
+          const t = new THREE.Texture(c); t.needsUpdate = true; return t;
+        })();
+
+        let N, homes, offs, vels, positions, ptsGeo, pts, lineGeo, lines, linePos, maxSeg, connectDist, visW, visH;
+        const rep = { R: 130, force: 7 };
+
+        function computeViewSize() {
+          const vFOV = (camera.fov * Math.PI) / 180;
+          visH = 2 * Math.tan(vFOV / 2) * camera.position.z;
+          visW = visH * camera.aspect;
+        }
+        function build() {
+          const w = window.innerWidth, h = window.innerHeight;
+          N = Math.max(40, Math.min(110, Math.floor((w * h) / 24000)));
+          computeViewSize();
+          const rangeX = visW * 0.62, rangeY = visH * 0.62, rangeZ = 170;
+          homes = new Float32Array(N * 3);
+          offs = new Float32Array(N * 3);
+          vels = new Float32Array(N * 3);
+          positions = new Float32Array(N * 3);
+          for (let i = 0; i < N; i++) {
+            homes[i * 3]     = (Math.random() * 2 - 1) * rangeX;
+            homes[i * 3 + 1] = (Math.random() * 2 - 1) * rangeY;
+            homes[i * 3 + 2] = (Math.random() * 2 - 1) * rangeZ;
+            vels[i * 3]     = (Math.random() * 2 - 1) * 0.12;
+            vels[i * 3 + 1] = (Math.random() * 2 - 1) * 0.12;
+            vels[i * 3 + 2] = (Math.random() * 2 - 1) * 0.08;
+          }
+          connectDist = Math.min(visW, visH) * 0.16;
+
+          if (pts) { group.remove(pts); ptsGeo.dispose(); }
+          if (lines) { group.remove(lines); lineGeo.dispose(); }
+
+          ptsGeo = new THREE.BufferGeometry();
+          ptsGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage));
+          const col = new THREE.Color(accent().glow);
+          const ptsMat = new THREE.PointsMaterial({
+            size: Math.max(2.4, visH * 0.006), map: sprite, color: col,
+            transparent: true, opacity: 0.9, depthWrite: false,
+            blending: THREE.AdditiveBlending, sizeAttenuation: true,
+          });
+          pts = new THREE.Points(ptsGeo, ptsMat); group.add(pts);
+
+          maxSeg = N * 8;
+          linePos = new Float32Array(maxSeg * 2 * 3);
+          lineGeo = new THREE.BufferGeometry();
+          lineGeo.setAttribute('position', new THREE.BufferAttribute(linePos, 3).setUsage(THREE.DynamicDrawUsage));
+          const lineMat = new THREE.LineBasicMaterial({
+            color: new THREE.Color(accent().primary),
+            transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.AdditiveBlending,
+          });
+          lines = new THREE.LineSegments(lineGeo, lineMat); group.add(lines);
+          three = { renderer, scene, camera, group, ptsMat, lineMat };
+        }
+        function resize() {
+          const w = window.innerWidth, h = window.innerHeight;
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h; camera.updateProjectionMatrix();
+        }
+        resize(); build();
+
+        // recolor with theme switcher
+        const recolor = () => {
+          if (!three) return;
+          three.ptsMat.color.set(accent().glow);
+          three.lineMat.color.set(accent().primary);
+        };
+        new MutationObserver(recolor).observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+
+        let rotX = 0, rotY = 0, running = true, raf;
+        function frame() {
+          if (!running) return;
+          // world-space mouse on z=0 plane
+          const ndcX = (mouse.x / window.innerWidth) * 2 - 1;
+          const ndcY = -((mouse.y / window.innerHeight) * 2 - 1);
+          const wmx = ndcX * visW / 2, wmy = ndcY * visH / 2;
+
+          for (let i = 0; i < N; i++) {
+            const ix = i * 3, iy = ix + 1, iz = ix + 2;
+            // drift homes with soft bounce
+            homes[ix] += vels[ix]; homes[iy] += vels[iy]; homes[iz] += vels[iz];
+            const rangeX = visW * 0.62, rangeY = visH * 0.62, rangeZ = 170;
+            if (homes[ix] > rangeX || homes[ix] < -rangeX) vels[ix] *= -1;
+            if (homes[iy] > rangeY || homes[iy] < -rangeY) vels[iy] *= -1;
+            if (homes[iz] > rangeZ || homes[iz] < -rangeZ) vels[iz] *= -1;
+            // cursor repulsion into the offset, which relaxes back to home
+            const dx = (homes[ix] + offs[ix]) - wmx;
+            const dy = (homes[iy] + offs[iy]) - wmy;
+            const d2 = dx * dx + dy * dy;
+            if (mouse.has && d2 < rep.R * rep.R) {
+              const d = Math.sqrt(d2) || 1;
+              const f = (1 - d / rep.R) * rep.force;
+              offs[ix] += (dx / d) * f; offs[iy] += (dy / d) * f;
+            }
+            offs[ix] *= 0.9; offs[iy] *= 0.9; offs[iz] *= 0.9;
+            positions[ix] = homes[ix] + offs[ix];
+            positions[iy] = homes[iy] + offs[iy];
+            positions[iz] = homes[iz] + offs[iz];
+          }
+          ptsGeo.attributes.position.needsUpdate = true;
+
+          // rebuild constellation lines
+          let s = 0;
+          for (let i = 0; i < N && s < maxSeg; i++) {
+            const ax = positions[i * 3], ay = positions[i * 3 + 1], az = positions[i * 3 + 2];
+            for (let j = i + 1; j < N && s < maxSeg; j++) {
+              const bx = positions[j * 3], by = positions[j * 3 + 1], bz = positions[j * 3 + 2];
+              const ddx = ax - bx, ddy = ay - by, ddz = az - bz;
+              if (ddx * ddx + ddy * ddy + ddz * ddz < connectDist * connectDist) {
+                linePos[s * 6] = ax; linePos[s * 6 + 1] = ay; linePos[s * 6 + 2] = az;
+                linePos[s * 6 + 3] = bx; linePos[s * 6 + 4] = by; linePos[s * 6 + 5] = bz;
+                s++;
+              }
+            }
+          }
+          lineGeo.setDrawRange(0, s * 2);
+          lineGeo.attributes.position.needsUpdate = true;
+
+          // gentle parallax toward cursor + slow spin
+          rotX = lerp(rotX, ndcY * 0.14, 0.05);
+          rotY = lerp(rotY, ndcX * 0.16, 0.05);
+          group.rotation.x = rotX;
+          group.rotation.y = rotY + performance.now() * 0.00002;
+
+          renderer.render(scene, camera);
+          raf = requestAnimationFrame(frame);
+        }
+        frame();
+
+        let rt;
+        window.addEventListener('resize', () => {
+          clearTimeout(rt);
+          rt = setTimeout(() => { resize(); build(); }, 180);
+        });
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) { running = false; cancelAnimationFrame(raf); }
+          else if (!running) { running = true; frame(); }
+        });
+      }
+      initConstellation();
+
+      /* ---------- Unified spring loop: cursor + magnetics ---------- */
+      if (finePointer && !reduceMotion) {
+        const tick = () => {
+          // magnetic warp
+          let capture = null;
+          for (const m of magnets) {
+            const r = m.el.getBoundingClientRect();
+            const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+            const dx = mouse.x - cx, dy = mouse.y - cy;
+            const radius = Math.max(r.width, r.height) * 0.75 + 26;
+            if (Math.hypot(dx, dy) < radius) {
+              m.tx = dx * m.strength; m.ty = dy * m.strength;
+              if (!capture) capture = { x: cx + dx * 0.35, y: cy + dy * 0.35 };
+            } else { m.tx = 0; m.ty = 0; }
+            m.cx = lerp(m.cx, m.tx, 0.18); m.cy = lerp(m.cy, m.ty, 0.18);
+            m.el.style.transform =
+              (Math.abs(m.cx) < 0.05 && Math.abs(m.cy) < 0.05) ? '' :
+              `translate(${m.cx.toFixed(2)}px, ${m.cy.toFixed(2)}px)`;
+          }
+          // cursor ring springs toward mouse (or capture point) + dot is instant
+          const tx = capture ? capture.x : mouse.x;
+          const ty = capture ? capture.y : mouse.y;
+          rx = lerp(rx, tx, capture ? 0.3 : 0.2);
+          ry = lerp(ry, ty, capture ? 0.3 : 0.2);
+          if (ring) ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+          if (dot) dot.style.transform = `translate(${mouse.x}px, ${mouse.y}px) translate(-50%, -50%)`;
+          requestAnimationFrame(tick);
+        };
+        tick();
+      }
+    })();
   </script>
 </body>
-
 </html>

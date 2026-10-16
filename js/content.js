@@ -24,12 +24,14 @@
       <div class="stat"><b>80+</b><small>Students mentored as TA</small></div>
       <div class="stat"><b>2</b><small>Research papers</small></div>
     </div>
+    <div class="spot" data-spot="skills">
     <div class="group"><div class="label">Programming &amp; scripting languages</div>${tags(['Python', 'C/C++', 'JavaScript', 'HTML', 'CSS', 'Go'])}</div>
     <div class="group"><div class="label">Frameworks &amp; libraries</div>${tags(['Scikit-learn', 'REST API', 'Pandas', 'OpenCV', 'MediaPipe', 'Matplotlib', 'Node.js', 'FastAPI', 'gRPC', 'NLTK'])}</div>
     <div class="group"><div class="label">Databases &amp; data formats</div>${tags(['PostgreSQL', 'MySQL', 'MongoDB', 'NoSQL', 'Firebase', 'Redis'])}</div>
     <div class="group"><div class="label">Technologies &amp; tools</div>${tags(['PySpark', 'RadixUI', 'Tableau', 'Databricks', 'Bootstrap', 'Agile/Scrum'])}</div>
     <div class="group"><div class="label">Cloud &amp; DevOps</div>${tags(['AWS (EC2, S3)', 'GCP', 'Docker', 'Kubernetes', 'GKE', 'Helm', 'Terraform', 'Prometheus', 'Grafana', 'CI/CD', 'Linux', 'Git', 'GitHub'])}</div>
-    <div class="group"><div class="label">Quantum computing</div>${tags(['D-Wave Ocean SDK', 'Google Cirq', 'QUBO', 'QAOA'])}</div>`,
+    <div class="group"><div class="label">Quantum computing</div>${tags(['D-Wave Ocean SDK', 'Google Cirq', 'QUBO', 'QAOA'])}</div>
+    </div>`,
     },
 
     projects: {
@@ -41,7 +43,7 @@
         <p>Real-time interview platform with computer vision, facial expression recognition, and speech synthesis. Fine-tuned ResNet-18 for attention and gaze detection at 94% accuracy, delivering adaptive, personalized feedback.</p>
         ${tags(['Python', 'PyTorch', 'MediaPipe', 'ResNet-18', 'LLMs', 'SadTalker', 'TTS'])}
         <div class="links">${ext('https://github.com/xqsong-angie/Realtime-Coding-Interviewer', 'GitHub')}</div></li>
-      <li class="item"><h3>Siren: Industrial IoT Telemetry Pipeline</h3>
+      <li class="item" data-spot="siren"><h3>Siren: Industrial IoT Telemetry Pipeline</h3>
         <p>End-to-end IoT pipeline for Oil &amp; Gas: simulates multi-sensor machinery drift, streams via Redis, and feeds three AI services — predictive maintenance, leak detection, and NLP incident parsing. Full observability with Prometheus + Grafana.</p>
         ${tags(['Python', 'Redis', 'Docker', 'Kubernetes', 'Terraform', 'Prometheus', 'Grafana'])}
         <div class="links">${ext('https://github.com/tanishkasonar22/Siren', 'GitHub')}</div></li>
@@ -84,13 +86,15 @@
         <div class="meta">ESDS Software Solution · Nashik, India</div>
         <p>Built an employee record management system in PHP + MySQL automating workflows for 200+ records, and deployed and monitored AWS (EC2, S3) infrastructure at 99.9% uptime.</p></li>
     </ul>
+    <div class="spot" data-spot="leadership">
     <div class="label sub">Leadership &amp; community</div>
     <ul class="items">
       <li class="item"><div class="item-top"><h3>Creative Head</h3><span class="meta">CSI, FCRIT</span></div>
         <p>Led a creative team on visual branding and marketing for major technical symposiums, driving a 40% increase in event registrations.</p></li>
       <li class="item"><div class="item-top"><h3>NSS Volunteer</h3><span class="meta">FCRIT</span></div>
         <p>Dedicated 240+ hours to community development, educational tutoring, and public-health drives for 200+ local residents through a special 7-day camp.</p></li>
-    </ul>`,
+    </ul>
+    </div>`,
     },
 
     life: {
@@ -98,9 +102,9 @@
       html: `
     <h2>Life outside the terminal.</h2>
     <ul class="items">
-      <li class="item"><h3>Volleyball Player</h3><p>Competitive team athlete</p></li>
-      <li class="item"><h3>Loves Painting</h3><p>Canvas and digital art</p></li>
-      <li class="item"><h3>Avid Gamer</h3><p>Strategy and open-world RPGs</p></li>
+      <li class="item" data-spot="volleyball"><h3>Volleyball Player</h3><p>Competitive team athlete</p></li>
+      <li class="item" data-spot="painting"><h3>Loves Painting</h3><p>Canvas and digital art</p></li>
+      <li class="item" data-spot="gaming"><h3>Avid Gamer</h3><p>Strategy and open-world RPGs</p></li>
     </ul>
     <p class="aside">Look around this cabin: the volleyball, the easel and the gaming rig are all here.</p>`,
     },
@@ -110,7 +114,7 @@
       html: `
     <h2>Let's build something together.</h2>
     <p>I'm always up for a coffee chat, collaboration, or a good technical rabbit hole. Fastest way to reach me is email.</p>
-    <div class="email-row"><span class="email">${EMAIL}</span><button class="copy" type="button" data-copy="${EMAIL}">Copy email</button></div>
+    <div class="email-row spot" data-spot="email"><span class="email">${EMAIL}</span><button class="copy" type="button" data-copy="${EMAIL}">Copy email</button></div>
     <div class="cta">
       <a class="btn primary" href="mailto:${EMAIL}">Say hello</a>
       <a class="btn" href="${LINKS.linkedin}" target="_blank" rel="noopener">LinkedIn ↗</a>

@@ -55,6 +55,22 @@ let reduce = reduceMQ.matches;
 reduceMQ.addEventListener ? reduceMQ.addEventListener('change',e=>reduce=e.matches) : reduceMQ.addListener(e=>reduce=e.matches);
 
 let openId=null, returnFocus=null, panelH=0;
+let pendingSpot=null;          // {id, key}: content to highlight once that cabin's panel is open
+const reduceNow=()=>reduceMQ.matches;
+
+function highlightSpot(key){
+  const el=panelBody.querySelector(`[data-spot="${key}"]`); if(!el) return;
+  const top=el.getBoundingClientRect().top-panelBody.getBoundingClientRect().top+panelBody.scrollTop-14;
+  panelBody.scrollTo({top, behavior:reduceNow()?'auto':'smooth'});
+  el.classList.remove('spot-flash'); void el.offsetWidth; el.classList.add('spot-flash');
+  setTimeout(()=>el.classList.remove('spot-flash'),2600);
+}
+const toastEl=$('toast'); let toastTimer=0;
+function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toastEl.classList.remove('show'),2400); }
+function copyEmail(){
+  const fail=()=>toast(`Email: ${LINKS.email}`);
+  try{ navigator.clipboard.writeText(LINKS.email).then(()=>toast(`Email copied: ${LINKS.email}`), fail); }catch(_){ fail(); }
+}
 function measurePanel(){ panelH=panel.offsetHeight; }
 if(window.ResizeObserver) new ResizeObserver(measurePanel).observe(panel);
 
@@ -76,6 +92,7 @@ function openPanel(id){
   panel.classList.add('open');
   $('panelTitle').focus({preventScroll:true});
   measurePanel(); setCurrent(id); setHash(id);
+  if(pendingSpot && pendingSpot.id===id){ const k=pendingSpot.key; pendingSpot=null; highlightSpot(k); }
 }
 // restore=true when the visitor dismissed the panel (Esc / ×); false when they walked out of the cabin.
 function closePanel(restore){
@@ -267,6 +284,9 @@ plant(-3.2,13.2,1.1); plant(3.2,13.2,1.1);
 /* furniture */
 // Seats that get a person once the static scene is built: {x, z, a (facing angle), pose, seatY}
 const seats=[];
+// Clickable props: clicking walks to the cabin and highlights the matching part of the panel.
+const hotspots=[];
+const spot=(objs,id,key,label)=>hotspots.push({objs:[].concat(objs), id, key, label});
 function plant(x,z,s=1){ const g=new THREE.Group(); g.position.set(x,0,z); scene.add(g);
   mesh(new THREE.CylinderGeometry(.28*s,.22*s,.5*s,14),M.pot,0,.25*s,0,g);
   mesh(new THREE.IcosahedronGeometry(.55*s,0),M.leaf,0,.95*s,0,g);
@@ -308,7 +328,7 @@ collideObj(sofaL,0);
 rug(-8.5,9.8,3.6,1.8,0x2e3b52);
 
 // About: desk + bookshelf
-{ const c=byId('about'); desk(c.cx-.5,c.z0+2.2,0,1); shelf(c.x0+.35,c.cz,Math.PI/2); plant(c.x0+1,c.z1-1); rug(c.cx,c.cz+.6,4,3,0x3a3150); }
+{ const c=byId('about'); desk(c.cx-.5,c.z0+2.2,0,1); spot(shelf(c.x0+.35,c.cz,Math.PI/2),'about','skills','Bookshelf · skills & stack'); plant(c.x0+1,c.z1-1); rug(c.cx,c.cz+.6,4,3,0x3a3150); }
 // Projects: whiteboard + 2-screen desk
 { const c=byId('projects');
   const wb=canvasTex(512,256,(g,w,h)=>{ g.fillStyle='#f6f7f4'; g.fillRect(0,0,w,h); g.lineWidth=4; g.font='600 22px "IBM Plex Mono", monospace';
@@ -317,27 +337,29 @@ rug(-8.5,9.8,3.6,1.8,0x2e3b52);
     node(200,160,'grafana','#b26b00');
     g.strokeStyle='#333'; g.beginPath(); g.moveTo(130,63); g.lineTo(198,63); g.moveTo(310,63); g.lineTo(378,63); g.moveTo(255,86); g.lineTo(255,158); g.stroke();
     g.fillStyle='#555'; g.font='500 18px "IBM Plex Mono", monospace'; g.fillText('min xᵀQx  s.t. x ∈ {0,1}ⁿ',40,236); });
-  box(3.4,1.9,.06,M.frame,c.cx,1.45,c.z0+.12,null,false); wallBoard(c.cx,c.z0+.16,3.2,1.7,wb);
+  spot([box(3.4,1.9,.06,M.frame,c.cx,1.45,c.z0+.12,null,false), wallBoard(c.cx,c.z0+.16,3.2,1.7,wb)],'projects','siren','Whiteboard · Siren IoT pipeline');
   desk(c.cx,c.z0+2.8,0,2); plant(c.x1-1,c.z1-1); rug(c.cx,c.cz+.8,4,3,0x2c3f4f); }
 // Experience: desk, cabinets, framed certificates
 { const c=byId('experience'); desk(c.cx,c.z0+2.2,0,1);
   for(let i=0;i<3;i++){ const f=box(.6,1.3,.6,M.metal,c.x0+.45,.65,c.cz-1+i*.7); collideObj(f,0); }
-  [-1.6,0,1.6].forEach((dx,i)=>{ box(1,.7,.04,M.oak,c.cx+dx,1.7,c.z0+.12,null,false); box(.84,.54,.01,i===1?M.amber:M.white,c.cx+dx,1.7,c.z0+.15,null,false); });
+  [-1.6,0,1.6].forEach((dx,i)=>{ spot([box(1,.7,.04,M.oak,c.cx+dx,1.7,c.z0+.12,null,false), box(.84,.54,.01,i===1?M.amber:M.white,c.cx+dx,1.7,c.z0+.15,null,false)],'experience','leadership','Certificates · leadership & community'); });
   plant(c.x0+1,c.z1-1); rug(c.cx,c.cz+.6,4,3,0x3a3150); }
 // Life: volleyball, easel with painting, gaming rig
 { const c=byId('life');
+  const ballHit=mesh(new THREE.SphereGeometry(.6,8,6),M.dark,c.cx-2.5,.4,c.cz+2,null,false); ballHit.visible=false;   // bigger invisible click target
+  spot(ballHit,'life','volleyball','Volleyball');
   mesh(new THREE.SphereGeometry(.25,24,16),new THREE.MeshStandardMaterial({map:canvasTex(256,128,(g,w,h)=>{ g.fillStyle='#f4f1e8'; g.fillRect(0,0,w,h); g.fillStyle='#1f6feb'; g.fillRect(0,40,w,18); g.fillStyle='#f2c230'; g.fillRect(0,78,w,18); }),roughness:.6}),c.cx-2.5,.25,c.cz+2);
   const easel=new THREE.Group(); easel.position.set(c.x1-1.8,0,c.cz+.5); easel.rotation.y=-.5; scene.add(easel);
   box(.06,1.9,.06,M.oak,-.45,.95,0,easel); box(.06,1.9,.06,M.oak,.45,.95,0,easel); box(.06,1.9,.06,M.oak,0,.9,-.4,easel); box(1.1,.05,.12,M.oak,0,.75,.05,easel);
   const art=canvasTex(256,320,(g,w,h)=>{ const gr=g.createLinearGradient(0,0,0,h); gr.addColorStop(0,'#2b3a67'); gr.addColorStop(.55,'#e07a5f'); gr.addColorStop(1,'#f2cc8f'); g.fillStyle=gr; g.fillRect(0,0,w,h);
     g.fillStyle='#f4f1de'; g.beginPath(); g.arc(170,150,38,0,7); g.fill(); g.fillStyle='#3d405b'; g.beginPath(); g.moveTo(0,250); g.lineTo(90,190); g.lineTo(170,240); g.lineTo(256,180); g.lineTo(256,320); g.lineTo(0,320); g.fill(); });
   box(.9,1.12,.04,M.white,0,1.35,.09,easel); mesh(new THREE.PlaneGeometry(.84,1.06),new THREE.MeshStandardMaterial({map:art}),0,1.35,.115,easel,false);
-  collideObj(easel,0);
+  collideObj(easel,0); spot(easel,'life','painting','Easel · painting');
   const gtex=canvasTex(256,144,(g,w,h)=>{ const gr=g.createLinearGradient(0,0,w,h); gr.addColorStop(0,'#2a1b5c'); gr.addColorStop(1,'#0e5a6b'); g.fillStyle=gr; g.fillRect(0,0,w,h);
     g.fillStyle='#7fd18b'; g.beginPath(); g.moveTo(0,h); for(let x=0;x<=w;x+=16) g.lineTo(x,100-Math.sin(x/30)*18-(x%32?6:0)); g.lineTo(w,h); g.fill(); g.fillStyle='#f2a541'; g.fillRect(118,78,10,16); });
   const tv=new THREE.Group(); tv.position.set(c.cx-.5,0,c.z0+.6); scene.add(tv);
   box(2.6,.5,.6,M.dark,0,.25,0,tv); box(2.4,1.3,.08,M.dark,0,1.35,-.15,tv); mesh(new THREE.PlaneGeometry(2.3,1.2),new THREE.MeshBasicMaterial({map:gtex}),0,1.35,-.105,tv,false);
-  collideObj(tv,0);
+  collideObj(tv,0); spot(tv,'life','gaming','Gaming setup');
   const gc=new THREE.Group(); gc.position.set(c.cx-.5,0,c.z0+2.6); scene.add(gc);
   box(.7,.12,.7,M.amber,0,.5,0,gc); box(.7,.95,.12,M.amber,0,1.05,.33,gc); box(.08,.45,.08,M.metal,0,.25,0,gc); collideObj(gc,-.1);
   seats.push({x:gc.position.x, z:gc.position.z, a:Math.PI, pose:'game', seatY:.56});
@@ -363,7 +385,7 @@ rug(-8.5,9.8,3.6,1.8,0x2e3b52);
     g.fillStyle='#97a3b6'; g.font='500 30px "IBM Plex Mono", monospace'; g.fillText('LinkedIn  ·  GitHub  ·  Resume',70,450);
     g.fillStyle='#f2a541'; g.fillRect(70,480,120,6); });
   box(3.95,2.1,.05,M.dark,TX,1.5,-33.88,null,false);
-  mesh(new THREE.PlaneGeometry(3.8,1.95),new THREE.MeshBasicMaterial({map:slide}),TX,1.5,-33.85,null,false);
+  spot(mesh(new THREE.PlaneGeometry(3.8,1.95),new THREE.MeshBasicMaterial({map:slide}),TX,1.5,-33.85,null,false),'contact','email','Click to copy email');
   // projector beam: a faint additive pyramid from the lens to the screen corners
   const ap=[TX,.86,TZ+1.29], zs=-33.83, cs=[[TX-1.9,.525],[TX+1.9,.525],[TX+1.9,2.475],[TX-1.9,2.475]], v=[];
   for(let i=0;i<4;i++){ const a=cs[i], b=cs[(i+1)%4]; v.push(...ap, a[0],a[1],zs, b[0],b[1],zs); }
@@ -516,7 +538,7 @@ function tourAdvance(){
   tourWalk();
 }
 let tookOver=false;   // set by any input that ends the tour, so the autoplay doesn't start late over it
-function endTour(){ tookOver=true; if(!tour) return; tour=null; updateTourUI(); }
+function endTour(){ tookOver=true; pendingSpot=null; if(!tour) return; tour=null; updateTourUI(); }
 // Hover (mouse), a recent touch/scroll in the panel, or keyboard focus on a panel control pauses the timer.
 function tourPaused(){
   const a=document.activeElement;
@@ -598,15 +620,44 @@ cv.addEventListener('pointerup',e=>{
   endTour();
   const moved=Math.hypot(e.clientX-d.x,e.clientY-d.y), dt=performance.now()-d.t;
   if(moved>10||dt>600) return;
-  const r=cv.getBoundingClientRect(); ndc.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
-  ray.setFromCamera(ndc,camera);
+  setRay(e);
   // clicking a door sign walks to that cabin
   const sh=ray.intersectObjects(CABINS.map(c=>c.sign));
   if(sh.length){ goTo(CABINS.find(c=>c.sign===sh[0].object).id); dismissHint(); return; }
+  const hs=spotAt();
+  if(hs){ activateSpot(hs); dismissHint(); return; }
   if(!ray.ray.intersectPlane(plane,hit)) return;
   if(!walkable(hit.x,hit.z)||blocked(hit.x,hit.z)) return;
   routeTo(hit.x,hit.z); dismissHint();
 });
+// clickable props
+function setRay(e){ const r=cv.getBoundingClientRect(); ndc.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1); ray.setFromCamera(ndc,camera); }
+const spotMeshes=[], spotOf=new Map();
+hotspots.forEach(h=>h.objs.forEach(o=>o.traverse(n=>{ if(n.isMesh){ spotMeshes.push(n); spotOf.set(n,h); } })));
+function spotAt(){ const hit=ray.intersectObjects(spotMeshes,false)[0]; return hit ? spotOf.get(hit.object) : null; }
+function activateSpot(h){
+  endTour(); hideTip();
+  if(h.key==='email') copyEmail();
+  pendingSpot={id:h.id, key:h.key};
+  goTo(h.id);                        // highlights right away if already inside, otherwise on arrival
+}
+// hover label (mouse only), raycast at most once per frame
+const tip=$('tip'); let tipEv=null, tipQueued=false;
+function hideTip(){ tipEv=null; tip.hidden=true; }
+function updateTip(){
+  tipQueued=false; const e=tipEv; if(!e) return;
+  setRay(e); const h=spotAt();
+  if(!h){ tip.hidden=true; return; }
+  if(tip.textContent!==h.label) tip.textContent=h.label;
+  tip.hidden=false;
+  const x=Math.min(e.clientX+14, innerWidth-tip.offsetWidth-8), y=Math.min(e.clientY+16, innerHeight-tip.offsetHeight-8);
+  tip.style.transform=`translate(${x}px,${y}px)`;
+}
+cv.addEventListener('pointermove',e=>{
+  if(e.pointerType!=='mouse' || e.buttons){ hideTip(); return; }
+  tipEv=e; if(!tipQueued){ tipQueued=true; requestAnimationFrame(updateTip); }
+});
+cv.addEventListener('pointerleave',hideTip);
 cv.addEventListener('wheel',e=>{
   e.preventDefault();
   const dy=e.deltaY*(e.deltaMode===1?33:1);   // Firefox reports lines

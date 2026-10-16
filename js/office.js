@@ -42,7 +42,6 @@ const initialHash = location.hash.slice(1);
 const $ = id => document.getElementById(id);
 const panel=$('panel'), panelBody=$('panelBody'), panelTag=$('panelTag'), dock=$('dock'), hint=$('hint'), loader=$('loader'), classicLink=$('classicLink');
 const tourbar=$('tourbar'), tourFill=$('tourFill'), tourLabel=$('tourLabel'), tourNextBtn=$('tourNextBtn'), tourStopBtn=$('tourStopBtn');
-$('resumeLink').href = LINKS.resume;
 
 if(matchMedia('(pointer: coarse)').matches) hint.innerHTML='Tap the floor to walk · pinch to zoom · or pick a cabin below';
 

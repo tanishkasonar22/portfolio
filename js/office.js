@@ -32,18 +32,23 @@ CABINS.forEach(c=>{
 });
 const byId = id => CABINS.find(c=>c.id===id);
 const LOBBY = {x:0, z:9};
+const OUTSIDE = {x:0, z:18.5};                       // tour starts on the plaza, outside the front doors
+const ENTRY = {z:12, in:{x:0,z:10.6}, out:{x:0,z:13.4}};
+const TOUR_STEP = 11;                                // seconds spent at each cabin on the tour
 const isPlace = id => id==='lobby' || !!byId(id);
 const initialHash = location.hash.slice(1);
 
 /* ---------------- UI ---------------- */
 const $ = id => document.getElementById(id);
 const panel=$('panel'), panelBody=$('panelBody'), panelTag=$('panelTag'), dock=$('dock'), hint=$('hint'), loader=$('loader'), classicLink=$('classicLink');
+const tourbar=$('tourbar'), tourFill=$('tourFill'), tourLabel=$('tourLabel'), tourNextBtn=$('tourNextBtn'), tourStopBtn=$('tourStopBtn');
 $('resumeLink').href = LINKS.resume;
 
 if(matchMedia('(pointer: coarse)').matches) hint.innerHTML='Tap the floor to walk · pinch to zoom · or pick a cabin below';
 
 dock.innerHTML = `<button type="button" data-go="lobby" aria-current="false"><span aria-hidden="true">00</span>Lobby</button>` +
-  CABINS.map(c=>`<button type="button" data-go="${c.id}" aria-current="false"><span aria-hidden="true">${c.n}</span>${c.name}</button>`).join('');
+  CABINS.map(c=>`<button type="button" data-go="${c.id}" aria-current="false"><span aria-hidden="true">${c.n}</span>${c.name}</button>`).join('') +
+  `<button type="button" class="tour-btn" data-tour aria-label="Start guided tour"><span aria-hidden="true">▶</span>Tour</button>`;
 const dockButtons=[...dock.querySelectorAll('button')];
 
 const reduceMQ = matchMedia('(prefers-reduced-motion: reduce)');
@@ -91,7 +96,6 @@ function setCurrent(id){
   if(cur){ const l=cur.offsetLeft, r=l+cur.offsetWidth;
     if(l<dock.scrollLeft) dock.scrollLeft=l-5; else if(r>dock.scrollLeft+dock.clientWidth) dock.scrollLeft=r-dock.clientWidth+5; }
 }
-$('closeBtn').onclick=()=>closePanel(true);
 
 // Arrow keys move between dock buttons, but only when the dock has keyboard focus;
 // after a mouse click on the dock, arrows keep walking the character.
@@ -238,7 +242,7 @@ const nameDecal = mesh(new THREE.PlaneGeometry(12,3), new THREE.MeshStandardMate
 nameDecal.rotation.x=-Math.PI/2;
 
 /* walls */
-wall('x',-13,13,12,'solid'); wall('x',-13,13,-34,'solid');
+wall('x',-13,13,ENTRY.z,'solid',[{c:0,w:2.4}]); wall('x',-13,13,-34,'solid');
 wall('z',12,-34,-13,'solid'); wall('z',12,-34,13,'solid');
 wall('x',-13,-3,3,'glass'); wall('x',3,13,3,'glass');
 wall('z',3,-26,-3,'glass',[{c:-2.5,w:2.4},{c:-13.5,w:2.4}]);
@@ -247,7 +251,23 @@ wall('x',-13,-3,-8,'glass'); wall('x',3,13,-8,'glass');
 wall('x',-13,-3,-19,'glass'); wall('x',3,13,-19,'glass');
 wall('x',-13,13,-26,'glass',[{c:0,w:2.4}]);
 
+/* front entrance + plaza outside (the tour starts here) */
+box(2.4,.5,T,M.wall,0,H-.25,ENTRY.z);                                       // lintel over the doorway
+[-1.24,1.24].forEach(x=>box(.08,H,.22,M.frame,x,H/2,ENTRY.z));
+const plazaTex = canvasTex(128,128,(g,w,h)=>{ g.fillStyle='#161d29'; g.fillRect(0,0,w,h); g.strokeStyle='rgba(255,255,255,0.07)'; g.lineWidth=3; g.strokeRect(0,0,w,h); }, [13,5]);
+const plaza = mesh(new THREE.PlaneGeometry(26,10), new THREE.MeshStandardMaterial({map:plazaTex, roughness:.95}), 0,0,ENTRY.z+5, null,false); plaza.rotation.x=-Math.PI/2;
+rug(0,ENTRY.z+1.3,2.4,1.3,0x2e3b52);
+const welcome=canvasTex(512,96,(g,w,h)=>{ g.fillStyle='#141c2a'; g.fillRect(0,0,w,h); g.fillStyle='#f2a541'; g.font='600 44px "IBM Plex Mono", monospace'; g.textAlign='center'; g.textBaseline='middle'; g.fillText('COME ON IN',w/2,h/2+2); });
+mesh(new THREE.PlaneGeometry(2.2,.41),new THREE.MeshBasicMaterial({map:welcome}),0,H-.25,ENTRY.z+T/2+.01,null,false);
+const porch=new THREE.PointLight(0xffc27a, 0.8, 9, 1.6); porch.position.set(0,2.4,ENTRY.z+1.6); scene.add(porch);
+// hedges bound the plaza
+[[0,21.7,26,.6],[-12.7,16.9,.6,9.4],[12.7,16.9,.6,9.4]].forEach(([x,z,w,d])=>collideObj(box(w,.7,d,M.leaf2,x,.35,z),0));
+[-5,5].forEach(x=>{ colliders.push({x0:x-.15,x1:x+.15,z0:19.35,z1:19.65}); box(.1,2.8,.1,M.metal,x,1.4,19.5); mesh(new THREE.SphereGeometry(.18,16,12),new THREE.MeshBasicMaterial({color:0xffd59a}),x,2.85,19.5,null,false); });
+plant(-3.2,13.2,1.1); plant(3.2,13.2,1.1);
+
 /* furniture */
+// Seats that get a person once the static scene is built: {x, z, a (facing angle), pose, seatY}
+const seats=[];
 function plant(x,z,s=1){ const g=new THREE.Group(); g.position.set(x,0,z); scene.add(g);
   mesh(new THREE.CylinderGeometry(.28*s,.22*s,.5*s,14),M.pot,0,.25*s,0,g);
   mesh(new THREE.IcosahedronGeometry(.55*s,0),M.leaf,0,.95*s,0,g);
@@ -263,7 +283,12 @@ function desk(x,z,rot=0,screens=1){ const g=new THREE.Group(); g.position.set(x,
   box(.55,.02,.18,M.dark,0,.8,.1,g);
   const ch=new THREE.Group(); ch.position.set(.1,0,.85); g.add(ch);
   box(.55,.08,.55,M.chair,0,.5,0,ch); box(.55,.6,.07,M.chair,0,.85,.26,ch); box(.06,.46,.06,M.metal,0,.25,0,ch);
+  const cs=Math.cos(rot), sn=Math.sin(rot);
+  seats.push({x:x+.1*cs+.85*sn, z:z-.1*sn+.85*cs, a:Math.PI+rot, pose:'type'});
   collideObj(g,0); return g; }
+// free-standing chair whose sitter faces angle a (front = (sin a, cos a))
+function chair(x,z,a){ const ch=new THREE.Group(); ch.position.set(x,0,z); ch.rotation.y=a+Math.PI; scene.add(ch);
+  box(.55,.08,.55,M.chair,0,.5,0,ch); box(.55,.6,.07,M.chair,0,.85,.26,ch); box(.06,.46,.06,M.metal,0,.25,0,ch); return ch; }
 function shelf(x,z,rot=0){ const g=new THREE.Group(); g.position.set(x,0,z); g.rotation.y=rot; scene.add(g);
   box(2,2,.4,M.dark,0,1,0,g);
   const bc=[0xf2a541,0x8fd0df,0xb49cff,0xe9edf3,0x7fd18b,0xd9775b];
@@ -316,18 +341,41 @@ rug(-8.5,9.8,3.6,1.8,0x2e3b52);
   collideObj(tv,0);
   const gc=new THREE.Group(); gc.position.set(c.cx-.5,0,c.z0+2.6); scene.add(gc);
   box(.7,.12,.7,M.amber,0,.5,0,gc); box(.7,.95,.12,M.amber,0,1.05,.33,gc); box(.08,.45,.08,M.metal,0,.25,0,gc); collideObj(gc,-.1);
+  seats.push({x:gc.position.x, z:gc.position.z, a:Math.PI, pose:'game', seatY:.56});
   plant(c.x0+1,c.z1-1); rug(c.cx-.5,c.z0+2.5,3.2,2.4,0x26334a); }
-// Contact lounge: sofa, coffee table, coffee bar, "Let's talk" sign
-{ const s=new THREE.Group(); s.position.set(-5,0,-32.6); scene.add(s);
-  box(4,.45,1.1,M.sofa,0,.3,0,s); box(4,.7,.28,M.sofa,0,.8,-.42,s); box(.28,.6,1.1,M.sofa,-1.86,.5,0,s); box(.28,.6,1.1,M.sofa,1.86,.5,0,s); collideObj(s,0);
-  const t=new THREE.Group(); t.position.set(-5,0,-30.6); scene.add(t);
-  box(2,.06,.9,M.oak,0,.45,0,t); box(1.8,.42,.06,M.metal,0,.21,0,t);
-  mesh(new THREE.CylinderGeometry(.07,.06,.14,16),M.amber,.4,.55,.1,t); mesh(new THREE.CylinderGeometry(.07,.06,.14,16),M.white,-.3,.55,-.1,t); collideObj(t,0);
+// Contact: conference room. Five people around a table, one presenting "Let's talk." on the projector screen; coffee bar on the side.
+{ const TX=-5, TZ=-30.6;
+  rug(TX,TZ,3.8,6,0x3a3150);
+  const t=new THREE.Group(); t.position.set(TX,0,TZ); scene.add(t);
+  box(1.8,.07,4.4,M.oak,0,.76,0,t); box(.5,.72,1,M.dark,0,.36,-1.2,t); box(.5,.72,1,M.dark,0,.36,1.2,t);
+  box(.36,.12,.3,M.white,0,.855,1.45,t);                                   // projector
+  mesh(new THREE.CylinderGeometry(.06,.06,.05,16),M.dark,0,.86,1.29,t).rotation.x=Math.PI/2;
+  mesh(new THREE.CylinderGeometry(.07,.06,.14,16),M.amber,-.5,.865,-.3,t); mesh(new THREE.CylinderGeometry(.07,.06,.14,16),M.white,.5,.865,.5,t);
+  [[-1.35,-1,Math.PI/2],[-1.35,.9,Math.PI/2],[1.35,-1,-Math.PI/2],[1.35,.9,-Math.PI/2],[0,2.85,Math.PI]].forEach(([dx,dz,a])=>{
+    chair(TX+dx,TZ+dz,a); seats.push({x:TX+dx,z:TZ+dz,a,pose:'meet',look:{x:TX,z:-33.85}});
+    const lp=new THREE.Group(); lp.position.set(TX+dx+Math.sin(a)*.75,.8,TZ+dz+Math.cos(a)*.75); lp.rotation.y=a; scene.add(lp);
+    box(.34,.02,.24,M.metal,0,0,0,lp); box(.34,.22,.015,M.dark,0,.12,.12,lp);
+  });
+  colliders.push({x0:TX-1.75,x1:TX+1.75,z0:TZ-2.3,z1:TZ+3.2});
+  const slide=canvasTex(1024,540,(g,w,h)=>{ g.fillStyle='#141c2a'; g.fillRect(0,0,w,h);
+    g.fillStyle='#f2a541'; g.font='600 30px "IBM Plex Mono", monospace'; g.fillText('05 · CONTACT',70,90);
+    g.font='800 150px "Bricolage Grotesque", sans-serif'; g.fillText("Let's talk.",64,280);
+    g.fillStyle='#e9edf3'; g.font='500 40px "IBM Plex Mono", monospace'; g.fillText(LINKS.email,70,370);
+    g.fillStyle='#97a3b6'; g.font='500 30px "IBM Plex Mono", monospace'; g.fillText('LinkedIn  ·  GitHub  ·  Resume',70,450);
+    g.fillStyle='#f2a541'; g.fillRect(70,480,120,6); });
+  box(3.95,2.1,.05,M.dark,TX,1.5,-33.88,null,false);
+  mesh(new THREE.PlaneGeometry(3.8,1.95),new THREE.MeshBasicMaterial({map:slide}),TX,1.5,-33.85,null,false);
+  // projector beam: a faint additive pyramid from the lens to the screen corners
+  const ap=[TX,.86,TZ+1.29], zs=-33.83, cs=[[TX-1.9,.525],[TX+1.9,.525],[TX+1.9,2.475],[TX-1.9,2.475]], v=[];
+  for(let i=0;i<4;i++){ const a=cs[i], b=cs[(i+1)%4]; v.push(...ap, a[0],a[1],zs, b[0],b[1],zs); }
+  const bg=new THREE.BufferGeometry(); bg.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
+  scene.add(new THREE.Mesh(bg,new THREE.MeshBasicMaterial({color:0xfff1d0,transparent:true,opacity:.07,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending})));
+  seats.push({x:TX+2.55,z:-33.0,a:-.45,pose:'present',look:{x:TX,z:TZ}});
+  colliders.push({x0:TX+2.2,x1:TX+2.9,z0:-33.4,z1:-32.6});
   const bar=new THREE.Group(); bar.position.set(6,0,-32.8); scene.add(bar);
   box(4,1,.8,M.dark,0,.5,0,bar); box(4.1,.06,.9,M.oak,0,1.03,0,bar); box(.5,.6,.45,M.metal,-1.2,1.36,-.1,bar);
   mesh(new THREE.CylinderGeometry(.07,.06,.14,16),M.white,.2,1.13,.1,bar); collideObj(bar,0);
-  const sign=canvasTex(1024,256,(g,w,h)=>{ g.fillStyle='#141c2a'; g.fillRect(0,0,w,h); g.fillStyle='#f2a541'; g.font='800 110px "Bricolage Grotesque", sans-serif'; g.textAlign='center'; g.fillText("Let's talk.",w/2,150); g.fillStyle='#97a3b6'; g.font='500 34px "IBM Plex Mono", monospace'; g.fillText(LINKS.email,w/2,215); });
-  wallBoard(0,-33.85,5,1.25,sign); plant(-12,-27,1.2); plant(12,-27,1.2); plant(1.5,-33,1); rug(-5,-31.2,5,3,0x3a3150); }
+  plant(-12,-27,1.2); plant(12,-27,1.2); plant(1.5,-33,1); }
 // dead-zone planters behind glass
 plant(8,-22.5,1.4); plant(-8,-22.5,1.4); plant(10.5,-24.5,1); plant(-10.5,-21,1);
 
@@ -343,29 +391,83 @@ CABINS.forEach(c=>{
 // Everything built so far is static: compute its matrices once instead of every frame.
 scene.children.forEach(o=>{ if(o===sun||o===sun.target) return; o.traverse(n=>{ n.updateMatrix(); n.matrixAutoUpdate=false; }); });
 
-/* character */
-const me=new THREE.Group(); scene.add(me);
-const skin=new THREE.MeshStandardMaterial({color:0xc08a66,roughness:.7});
-const jacket=new THREE.MeshStandardMaterial({color:0x2c6e72,roughness:.7});
-const pants=new THREE.MeshStandardMaterial({color:0x252a35,roughness:.8});
-const hair=new THREE.MeshStandardMaterial({color:0x1a1310,roughness:.9});
-const shoe=new THREE.MeshStandardMaterial({color:0xece8df,roughness:.6});
-const body=new THREE.Group(); me.add(body);
-function limb(px,py,w,h,d,mat,footMat){ const pv=new THREE.Group(); pv.position.set(px,py,0); body.add(pv);
-  box(w,h,d,mat,0,-h/2,0,pv); if(footMat) box(w+.04,.1,d+.12,footMat,0,-h-.0,.05,pv); return pv; }
-const legL=limb(-.13,.88,.2,.8,.22,pants,shoe), legR=limb(.13,.88,.2,.8,.22,pants,shoe);
-box(.56,.7,.32,jacket,0,1.22,0,body); box(.2,.42,.33,new THREE.MeshStandardMaterial({color:0xe9edf3,roughness:.8}),0,1.33,.005,body);
-box(.6,.1,.06,M.amber,0,1.0,.17,body,false);
-const armL=limb(-.37,1.52,.15,.66,.17,jacket), armR=limb(.37,1.52,.15,.66,.17,jacket);
-[armL,armR].forEach(a=>mesh(new THREE.SphereGeometry(.08,10,8),skin,0,-.7,0,a));
-mesh(new THREE.CylinderGeometry(.08,.09,.12,10),skin,0,1.62,0,body);
-mesh(new THREE.SphereGeometry(.21,24,18),skin,0,1.84,0,body);
-mesh(new THREE.SphereGeometry(.225,24,18,0,Math.PI*2,0,Math.PI*.55),hair,0,1.86,-.02,body);
-box(.36,.4,.12,hair,0,1.74,-.16,body);
-[-.075,.075].forEach(x=>mesh(new THREE.SphereGeometry(.025,8,6),M.dark,x,1.86,.19,body,false));
+/* people: one builder for the player and the office workers */
+function buildPerson(look){
+  const g=new THREE.Group(), body=new THREE.Group(); g.add(body);
+  const skinM=flat(look.skin,.7), topM=flat(look.top,.7), pantsM=flat(look.pants,.8), hairM=flat(look.hair,.9), shoeM=flat(look.shoe||0xece8df,.6);
+  // legs have a knee so the same rig can walk and sit
+  const leg=px=>{ const hip=new THREE.Group(); hip.position.set(px,.88,0); body.add(hip);
+    box(.2,.4,.22,pantsM,0,-.2,0,hip);
+    const knee=new THREE.Group(); knee.position.y=-.4; hip.add(knee);
+    box(.2,.4,.22,pantsM,0,-.2,0,knee); box(.24,.1,.34,shoeM,0,-.4,.05,knee);
+    hip.knee=knee; return hip; };
+  const arm=px=>{ const sh=new THREE.Group(); sh.position.set(px,1.52,0); body.add(sh);
+    box(.15,.66,.17,topM,0,-.33,0,sh); mesh(new THREE.SphereGeometry(.08,10,8),skinM,0,-.7,0,sh); return sh; };
+  const legL=leg(-.13), legR=leg(.13);
+  box(.56,.7,.32,topM,0,1.22,0,body);
+  if(look.inner) box(.2,.42,.33,flat(look.inner,.8),0,1.33,.005,body);
+  if(look.belt) box(.6,.1,.06,M.amber,0,1.0,.17,body,false);
+  const armL=arm(-.37), armR=arm(.37);
+  mesh(new THREE.CylinderGeometry(.08,.09,.12,10),skinM,0,1.62,0,body);
+  const head=new THREE.Group(); head.position.y=1.62; body.add(head);
+  mesh(new THREE.SphereGeometry(.21,24,18),skinM,0,.22,0,head);
+  mesh(new THREE.SphereGeometry(.225,24,18,0,Math.PI*2,0,Math.PI*.55),hairM,0,.24,-.02,head);
+  if(look.longHair) box(.36,.4,.12,hairM,0,.12,-.16,head);
+  [-.075,.075].forEach(x=>mesh(new THREE.SphereGeometry(.025,8,6),M.dark,x,.24,.19,head,false));
+  return {g, body, legL, legR, armL, armR, head};
+}
+
+const P=buildPerson({skin:0xc08a66, top:0x2c6e72, pants:0x252a35, hair:0x1a1310, inner:0xe9edf3, belt:true, longHair:true});
+const me=P.g, body=P.body, legL=P.legL, legR=P.legR, armL=P.armL, armR=P.armR;
+scene.add(me);
 const shadowDisc=mesh(new THREE.CircleGeometry(.45,24),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.25,depthWrite:false}),0,.015,0,me,false);
 shadowDisc.rotation.x=-Math.PI/2;
 me.position.set(LOBBY.x,0,LOBBY.z+0.5); me.rotation.y=Math.PI;
+
+/* sliding glass front doors: open when the player comes near */
+const doorPanels=[-1,1].map(side=>{ const d=new THREE.Group(); d.position.set(side*.6,0,ENTRY.z+T/2+.05); scene.add(d);
+  box(1.2,2.1,.04,M.glass,0,1.05,0,d,false);
+  box(1.2,.06,.06,M.frame,0,2.07,0,d,false); box(1.2,.06,.06,M.frame,0,.03,0,d,false); box(.05,2.1,.06,M.frame,-side*.58,1.05,0,d,false);
+  d.side=side; return d; });
+let doorOpen=0;
+
+/* office workers */
+const LOOKS=[
+  {skin:0x8d5a3b, top:0x6a4c93, pants:0x2b2f3a, hair:0x0f0c0a},
+  {skin:0xe0b48f, top:0x3d7a5a, pants:0x3a3f4b, hair:0x6b4a2b, longHair:true},
+  {skin:0x6b4128, top:0xb5553c, pants:0x23262e, hair:0x0f0c0a, longHair:true},
+  {skin:0xf1c9a5, top:0x2f5d8a, pants:0x2b2f3a, hair:0xb98a4e},
+  {skin:0xc68e65, top:0x8a6d2f, pants:0x30343f, hair:0x2b1d14},
+  {skin:0x9c6b4a, top:0x2c6e72, pants:0x252a35, hair:0x1a1310, longHair:true},
+  {skin:0xe8bf98, top:0x7a3b5c, pants:0x2b2f3a, hair:0x3a3a3a},
+  {skin:0x5a3825, top:0x4a5a7a, pants:0x23262e, hair:0x0f0c0a},
+  {skin:0xd9a47e, top:0x9b8a5a, pants:0x30343f, hair:0x4a2e1a, longHair:true},
+];
+const crew=seats.map((s,i)=>{
+  const p=buildPerson(LOOKS[i%LOOKS.length]); scene.add(p.g);
+  p.g.rotation.y=s.a; p.pose=s.pose; p.seed=i*1.7;
+  // head yaw (relative to the body) that faces the seat's point of interest
+  p.lookY = s.look ? Math.max(-1.1,Math.min(1.1,Math.atan2(Math.sin(Math.atan2(s.look.x-s.x,s.look.z-s.z)-s.a),Math.cos(Math.atan2(s.look.x-s.x,s.look.z-s.z)-s.a)))) : 0;
+  if(s.pose==='present'){ p.g.position.set(s.x,0,s.z); return p; }
+  // sitting: hips just above the seat, thighs forward, shins down (stretched a little to reach the floor)
+  p.g.position.set(s.x-Math.sin(s.a)*.08, 0, s.z-Math.cos(s.a)*.08);
+  p.body.position.y=(s.seatY||.54)+.1-.88;
+  [p.legL,p.legR].forEach(l=>{ l.rotation.x=-Math.PI/2; l.knee.rotation.x=Math.PI/2; l.knee.scale.y=1.3; });
+  if(s.pose==='game'){
+    p.armL.rotation.set(-.85,0,.3); p.armR.rotation.set(-.85,0,-.3);
+    box(.32,.06,.14,M.dark,0,1.06,.46,p.body,false);                    // controller
+  }
+  return p;
+});
+// small idle motions: typing, gaming, nodding along, pointing at the slide
+function animateCrew(t){
+  crew.forEach(p=>{ const k=t+p.seed;
+    if(p.pose==='type'){ p.armL.rotation.x=-.9+Math.sin(k*11)*.05; p.armR.rotation.x=-.9+Math.sin(k*11+1.6)*.05; p.head.rotation.x=.12+Math.sin(k*.7)*.04; }
+    else if(p.pose==='game'){ p.armL.rotation.x=-.85+Math.sin(k*7)*.04; p.armR.rotation.x=-.85+Math.sin(k*9)*.04; p.head.rotation.y=Math.sin(k*1.3)*.1; }
+    else if(p.pose==='meet'){ p.armL.rotation.x=p.armR.rotation.x=-.95; p.head.rotation.y=p.lookY+Math.sin(k*.4)*.12; p.head.rotation.x=Math.sin(k*1.1)*.05; }
+    else if(p.pose==='present'){ p.armL.rotation.z=-2+Math.sin(k*1.4)*.12; p.armR.rotation.x=Math.sin(k*.9)*.15; p.body.position.y=Math.sin(k*2)*.006; p.head.rotation.y=p.lookY*(.6+.4*Math.sin(k*.5)); }
+  });
+}
 
 /* target ring */
 const ring=mesh(new THREE.RingGeometry(.32,.42,32),new THREE.MeshBasicMaterial({color:0xf2a541,transparent:true,opacity:0,depthWrite:false}),0,.03,0,null,false);
@@ -378,31 +480,94 @@ function step(dx,dz){ let ok=false; const p=me.position;
   if(dx&&!blocked(p.x+dx,p.z)){p.x+=dx;ok=true;} if(dz&&!blocked(p.x,p.z+dz)){p.z+=dz;ok=true;} return ok; }
 const inside=(c,x,z,inset=0)=>x>c.x0+inset&&x<c.x1-inset&&z>c.z0+inset&&z<c.z1-inset;
 const cabinAt=(x,z,inset=0)=>CABINS.find(c=>inside(c,x,z,inset))||null;
-const walkable=(x,z)=>!!cabinAt(x,z,.3)||(x>-2.7&&x<2.7&&z>-25.7&&z<3.3)||(z>3.3&&z<11.7&&x>-12.7&&x<12.7);
+const isOutside=z=>z>ENTRY.z;
+const walkable=(x,z)=>!!cabinAt(x,z,.3)||(x>-2.7&&x<2.7&&z>-25.7&&z<3.3)||(z>3.3&&z<11.7&&x>-12.7&&x<12.7)||(z>12.4&&z<21.2&&x>-12.2&&x<12.2);
 
 let path=[], stuck=0;
-function routeTo(tx,tz){
+// quiet: no target ring (used by the guided tour)
+function routeTo(tx,tz,quiet){
   const p=me.position, from=cabinAt(p.x,p.z), to=cabinAt(tx,tz,.2), wps=[];
   if(from && from!==to){ wps.push(from.in, from.out); }
+  if(isOutside(p.z) && !isOutside(tz)) wps.push(ENTRY.out, ENTRY.in);
+  if(!isOutside(p.z) && isOutside(tz)) wps.push(ENTRY.in, ENTRY.out);
   if(to && to!==from){ wps.push(to.out, to.in); }
   wps.push({x:tx,z:tz}); path=wps.map(w=>({x:w.x,z:w.z})); stuck=0;
-  ring.position.set(tx,.03,tz); ring.material.opacity=.9; ring.scale.setScalar(1);
+  if(!quiet){ ring.position.set(tx,.03,tz); ring.material.opacity=.9; ring.scale.setScalar(1); }
 }
-function goTo(id){
-  if(id==='lobby'){ routeTo(LOBBY.x,LOBBY.z); setCurrent('lobby'); closePanel(false); return; }
+function goTo(id,quiet){
+  if(id==='lobby'){ routeTo(LOBBY.x,LOBBY.z,quiet); setCurrent('lobby'); closePanel(false); return; }
   const c=byId(id); if(!c) return;
-  routeTo(c.stand.x,c.stand.z); setCurrent(id);
+  routeTo(c.stand.x,c.stand.z,quiet); setCurrent(id);
   if(cabinAt(me.position.x,me.position.z,.4)===c) openPanel(id);
 }
-dock.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ goTo(b.dataset.go); dismissHint(); } });
-addEventListener('hashchange',()=>{ const id=location.hash.slice(1); if(isPlace(id)) goTo(id); });
+
+/* guided tour: (intro: plaza → lobby) → About → Projects → Experience → Life → Contact.
+   Any navigation input (keys, clicking the scene, dock cabins, Esc/×) ends it; zooming doesn't. */
+let tour=null;                 // {phase:'intro'|'pause'|'walk'|'read', i, t, tries}
+let hoverPanel=false, holdUntil=0;
+function startTour(withIntro){
+  tour={phase:withIntro?'intro':'walk', i:0, t:0, tries:0};
+  if(withIntro) routeTo(LOBBY.x,LOBBY.z,true); else goTo(CABINS[0].id,true);
+}
+function tourWalk(){ tour.phase='walk'; tour.t=0; goTo(CABINS[tour.i].id,true); }
+function tourAdvance(){
+  if(!tour) return;
+  tour.i++; tour.tries=0;
+  if(tour.i>=CABINS.length){ endTour(); return; }
+  tourWalk();
+}
+let tookOver=false;   // set by any input that ends the tour, so the autoplay doesn't start late over it
+function endTour(){ tookOver=true; if(!tour) return; tour=null; updateTourUI(); }
+// Hover (mouse), a recent touch/scroll in the panel, or keyboard focus on a panel control pauses the timer.
+function tourPaused(){
+  const a=document.activeElement;
+  return hoverPanel || performance.now()<holdUntil || (panel.contains(a) && a.id!=='panelTitle');
+}
+function tourTick(dt){
+  if(!tour) return;
+  const target=CABINS[tour.i];
+  if(tour.phase==='intro'){ if(!path.length){ tour.phase='pause'; tour.t=0; } }
+  else if(tour.phase==='pause'){ tour.t+=dt; if(tour.t>.8) tourWalk(); }
+  else if(tour.phase==='walk'){
+    if(!path.length){
+      if(openId===target.id){ tour.phase='read'; tour.t=0; }
+      else if(++tour.tries>2) endTour(); else goTo(target.id,true);
+    }
+  }
+  else if(tour.phase==='read'){ if(!tourPaused()) tour.t+=dt; if(tour.t>=TOUR_STEP) tourAdvance(); }
+  updateTourUI();
+}
+const tourUI={shown:null,label:'',next:'',f:-1};
+function updateTourUI(){
+  const show=!!tour && (tour.phase==='walk'||tour.phase==='read') && openId===CABINS[tour.i].id;
+  if(show!==tourUI.shown){ tourbar.hidden=!show; tourUI.shown=show; }
+  if(!show) return;
+  const label=`Guided tour · ${tour.i+1} of ${CABINS.length}${tour.phase==='read'&&tourPaused()?' · paused':''}`;
+  if(label!==tourUI.label){ tourLabel.textContent=label; tourUI.label=label; }
+  const next=tour.i===CABINS.length-1?'Finish':'Next';
+  if(next!==tourUI.next){ tourNextBtn.textContent=next; tourUI.next=next; }
+  const f=tour.phase==='read'?Math.min(1,tour.t/TOUR_STEP):0;
+  if(Math.abs(f-tourUI.f)>.001){ tourFill.style.transform=`scaleX(${f})`; tourUI.f=f; }
+}
+tourNextBtn.addEventListener('click',tourAdvance);
+tourStopBtn.addEventListener('click',()=>{ endTour(); path=[]; const h=$('panelTitle'); if(h) h.focus({preventScroll:true}); });
+panel.addEventListener('pointerenter',e=>{ if(e.pointerType==='mouse') hoverPanel=true; });
+panel.addEventListener('pointerleave',e=>{ if(e.pointerType==='mouse') hoverPanel=false; });
+panel.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse') holdUntil=performance.now()+5000; });
+panelBody.addEventListener('scroll',()=>{ holdUntil=Math.max(holdUntil,performance.now()+3000); },{passive:true});
+$('closeBtn').onclick=()=>{ endTour(); closePanel(true); };
+
+dock.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+  dismissHint();
+  if(b.hasAttribute('data-tour')) startTour(false); else { endTour(); goTo(b.dataset.go); } });
+addEventListener('hashchange',()=>{ const id=location.hash.slice(1); if(isPlace(id)){ endTour(); goTo(id); } });
 
 const keys=new Set();
 const KEYMAP={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]};
 addEventListener('keydown',e=>{
-  if(e.key==='Escape'){ closePanel(true); return; }
+  if(e.key==='Escape'){ endTour(); closePanel(true); return; }
   if(e.metaKey || e.ctrlKey || e.altKey) return;
-  if(KEYMAP[e.code]){ keys.add(e.code); path=[]; e.preventDefault(); dismissHint(); }
+  if(KEYMAP[e.code]){ endTour(); keys.add(e.code); path=[]; e.preventDefault(); dismissHint(); }
 });
 addEventListener('keyup',e=>keys.delete(e.code));
 addEventListener('blur',()=>keys.clear());
@@ -431,6 +596,7 @@ cv.addEventListener('pointerup',e=>{
   if(pointers.size) return;
   const d=down, pinched=!!pinch; down=null; pinch=null;
   if(!d || pinched) return;
+  endTour();
   const moved=Math.hypot(e.clientX-d.x,e.clientY-d.y), dt=performance.now()-d.t;
   if(moved>10||dt>600) return;
   const r=cv.getBoundingClientRect(); ndc.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
@@ -502,6 +668,14 @@ function frame(){
 
   if(ring.material.opacity>0){ ring.material.opacity=Math.max(0,ring.material.opacity-dt*.9); ring.scale.setScalar(1+(.9-ring.material.opacity)*.6); }
 
+  tourTick(dt);
+  animateCrew(clock.elapsedTime);
+
+  // front doors slide open as the player approaches
+  const near=Math.hypot(p.x,p.z-ENTRY.z)<3.2?1:0;
+  doorOpen = reduce ? near : doorOpen+(near-doorOpen)*Math.min(1,dt*7);
+  doorPanels.forEach(d=>{ d.position.x=d.side*(.6+1.25*doorOpen); });
+
   // cabins: open on entry, close on exit
   const c=cabinAt(p.x,p.z,.4);
   if(c!==lastCabin){ lastCabin=c; if(c){ openPanel(c.id); dismissHint(); } else { closePanel(false); if(!path.length) setCurrent(null); } }
@@ -524,11 +698,18 @@ function frame(){
   renderer.render(scene,camera);
   requestAnimationFrame(frame);
 }
+// No deep link and motion allowed: start outside and take the guided tour. Reduced motion starts in the lobby (▶ Tour still works).
+const autoTour = !isPlace(initialHash) && !reduce;
+if(autoTour){
+  me.position.set(OUTSIDE.x,0,OUTSIDE.z);
+  hint.textContent = matchMedia('(pointer: coarse)').matches ? 'Guided tour · tap anywhere to explore on your own' : 'Guided tour · press any key or click to explore on your own';
+}
 frame();
 
-// First frame is on screen: drop the loader, then follow a deep link like /#projects.
+// First frame is on screen: drop the loader, then start the tour or follow a deep link like /#projects.
 loader.classList.add('done');
 setTimeout(()=>loader.remove(), reduce ? 0 : 600);
-if(isPlace(initialHash) && initialHash!=='lobby') setTimeout(()=>goTo(initialHash), reduce ? 0 : 400);
+if(autoTour) setTimeout(()=>{ if(!tookOver) startTour(true); }, 700);
+else if(isPlace(initialHash) && initialHash!=='lobby') setTimeout(()=>goTo(initialHash), reduce ? 0 : 400);
 }
 })();

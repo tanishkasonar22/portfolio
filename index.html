@@ -57,6 +57,16 @@
     <div class="door-tag" id="panelTag">Cabin</div>
     <button class="close" id="closeBtn" type="button" aria-label="Close panel">×</button>
   </div>
+  <div class="tourbar" id="tourbar" hidden>
+    <div class="tour-progress" aria-hidden="true"><span id="tourFill"></span></div>
+    <div class="tour-row">
+      <span class="tour-label" id="tourLabel">Guided tour</span>
+      <span class="tour-actions">
+        <button class="tbtn" id="tourNextBtn" type="button">Next</button>
+        <button class="tbtn ghost" id="tourStopBtn" type="button">Stop tour</button>
+      </span>
+    </div>
+  </div>
   <div class="panel-body" id="panelBody"></div>
 </aside>
 

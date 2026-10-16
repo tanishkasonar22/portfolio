@@ -57,6 +57,11 @@
         <p>A full-stack ride-sharing platform designed to reduce carbon footprints and commute costs. Connects drivers and passengers in real time with secure authentication, route matching, and an integrated booking dashboard.</p>
         ${tags(['React', 'Node.js', 'Express', 'MongoDB', 'Socket.io', 'Google Maps API', 'JWT'])}
         <div class="links">${ext('https://github.com/tanishkasonar22/carpooling', 'GitHub')}${ext('https://drive.google.com/file/d/1juzpk5n6-WR-3YA7hf4tQMyWlOMporlR/view', 'Demo')}</div></li>
+      <li class="item"><h3>Buy to Door</h3>
+        <p>Buy to Door is an age-verified ticket shop built on the Credence Cloud SDK. A buyer proves they are over 21 from the digital ID in their phone wallet, and the shop learns only one thing: yes or no. It stores no name, birth date or photo.</p>
+        <p>A strict rule in the shop, not an AI model, makes the final decision. Only a clear “yes” passes, and the buyer gets a signed, single-use ticket and a privacy receipt. Buyers without a digital ID can still buy a ticket marked for an ID check at the gate. Organisers get a dashboard, a setup-readiness check and a gate view, none of which show personal details.</p>
+        <p>It works with a simulated wallet (mock mode) and with a real Android wallet answering live Credence requests. It has 266 automated tests.</p>
+        ${tags(['Credence Cloud SDK', 'Digital ID', 'Age verification', 'Privacy', 'Android wallet'])}</li>
     </ul>`,
     },
 

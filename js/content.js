@@ -61,7 +61,8 @@
         <p>Buy to Door is an age-verified ticket shop built on the Credence Cloud SDK. A buyer proves they are over 21 from the digital ID in their phone wallet, and the shop learns only one thing: yes or no. It stores no name, birth date or photo.</p>
         <p>A strict rule in the shop, not an AI model, makes the final decision. Only a clear “yes” passes, and the buyer gets a signed, single-use ticket and a privacy receipt. Buyers without a digital ID can still buy a ticket marked for an ID check at the gate. Organisers get a dashboard, a setup-readiness check and a gate view, none of which show personal details.</p>
         <p>It works with a simulated wallet (mock mode) and with a real Android wallet answering live Credence requests. It has 266 automated tests.</p>
-        ${tags(['Credence Cloud SDK', 'Digital ID', 'Age verification', 'Privacy', 'Android wallet'])}</li>
+        ${tags(['Credence Cloud SDK', 'Digital ID', 'Age verification', 'Privacy', 'Android wallet'])}
+        <div class="links">${ext('https://github.com/tanishkasonar22/buy-to-door', 'GitHub')}</div></li>
     </ul>`,
     },
 
